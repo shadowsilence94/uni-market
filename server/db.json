@@ -1,0 +1,165 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "HTUT KO KO",
+      "email": "st126010@ait.asia",
+      "password": "Htutkoko@17",
+      "nationality": "Myanmar",
+      "profile_picture": "",
+      "is_ait_certified": true,
+      "role": "admin",
+      "is_verified": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Test User",
+      "email": "user@ait.asia",
+      "password": "password",
+      "nationality": "Thai",
+      "profile_picture": "",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": true,
+      "created_at": "2025-01-02T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Htut Ko Ko",
+      "email": "htutkoko1994@gmail.com",
+      "password": "$2b$10$q3B7nfR.E.KKt56cWzcZEumnZ6XERnOWgIxL59aLgg257rvUfXvdW",
+      "nationality": "Myanmar",
+      "profile_picture": "",
+      "is_ait_certified": false,
+      "role": "user",
+      "is_verified": false,
+      "created_at": "2025-10-14T15:27:46.921Z"
+    },
+    {
+      "id": 4,
+      "name": "Anuba",
+      "email": "ak@ait.asia",
+      "password": "$2b$10$4p52/p/aKYcrEFul7EMtEu4gH0Co2pi5kmpFLVJA2iPH/O63P7ANu",
+      "nationality": "Indian",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": false,
+      "created_at": "2025-10-14T16:04:35.732Z"
+    },
+    {
+      "id": 5,
+      "name": "prom",
+      "email": "prom@ait.asia",
+      "password": "$2b$10$1XwHfDVivHVJzjWX6umD4.Q7J.tVZisj6zaBHjEx4mHy22P22FwGm",
+      "nationality": "Nepalese",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": true,
+      "created_at": "2025-10-14T16:29:08.078Z",
+      "profile_picture": "data:image/webp;base64,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"
+    },
+    {
+      "id": 6,
+      "name": "gigi",
+      "email": "gigi@ait.asia",
+      "password": "$2b$10$Nr0NVaYEo/Ra.F9pBGKSDOw7c2tidcz8yvs2Xjyi84oXT0BU.cIzi",
+      "nationality": "Myanmar",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": false,
+      "created_at": "2025-10-14T16:38:22.340Z"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "title": "Handmade Birthday Card",
+      "description": "A beautiful, custom-made birthday card. Perfect for a special someone.",
+      "price": 5,
+      "category": "Products",
+      "tags": [
+        "Handmade",
+        "Gift",
+        "Card"
+      ],
+      "sellerId": 2,
+      "views": 152,
+      "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
+      "created_at": "2025-01-05T10:30:00Z",
+      "updated_at": "2025-01-05T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "title": "Graphic Design Service",
+      "description": "Professional logo and branding design for your project.",
+      "price": 50,
+      "category": "Services",
+      "tags": [
+        "Design",
+        "Branding",
+        "Logo"
+      ],
+      "sellerId": 2,
+      "views": 230,
+      "image_url": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
+      "created_at": "2025-01-06T14:15:00Z",
+      "updated_at": "2025-01-06T14:15:00Z"
+    },
+    {
+      "id": 3,
+      "title": "AIT Hoodie",
+      "description": "Official AIT branded hoodie. Available in all sizes.",
+      "price": 25,
+      "category": "Products",
+      "tags": [
+        "Apparel",
+        "AIT",
+        "University"
+      ],
+      "sellerId": 1,
+      "views": 454,
+      "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+      "created_at": "2025-01-07T09:20:00Z",
+      "updated_at": "2025-01-08T16:45:00Z"
+    },
+    {
+      "id": 4,
+      "title": "Tutoring Service",
+      "description": "Math and Science tutoring for all levels.",
+      "price": 20,
+      "category": "Services",
+      "tags": [
+        "Education",
+        "Tutoring"
+      ],
+      "sellerId": 2,
+      "views": 120,
+      "image_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=300&fit=crop",
+      "created_at": "2025-01-08T11:00:00Z",
+      "updated_at": "2025-01-08T11:00:00Z"
+    }
+  ],
+  "orders": [],
+  "chats": [],
+  "notifications": [
+    {
+      "id": 1,
+      "title": "Welcome to Uni-Market!",
+      "message": "Start buying and selling with the AIT community.",
+      "userId": "all",
+      "read": false,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "verification_requests": [
+    {
+      "id": 1,
+      "userId": 5,
+      "proof_document": "data:image/webp;base64,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",
+      "message": "",
+      "status": "approved",
+      "created_at": "2025-10-14T16:57:44.507Z"
+    }
+  ]
+}

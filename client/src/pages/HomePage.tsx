@@ -1,0 +1,328 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import ProductCard from '../components/ProductCard';
+import FeaturesSection from '../components/FeaturesSection';
+import type { Item } from '../types';
+
+const HomePage: React.FC = () => {
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('/api/items');
+        setItems(response.data);
+      } catch (err) {
+        setError('Failed to fetch items. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  // Sort by views (popularity) and take top 6 for featured
+  const featuredItems = items
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 6);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % Math.max(1, featuredItems.length - 2));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + Math.max(1, featuredItems.length - 2)) % Math.max(1, featuredItems.length - 2));
+  };
+
+  const handleManualNavigation = (direction: 'next' | 'prev') => {
+    setIsAutoPlaying(false);
+    if (direction === 'next') {
+      nextSlide();
+    } else {
+      prevSlide();
+    }
+    // Resume auto-play after 5 seconds
+    setTimeout(() => setIsAutoPlaying(true), 5000);
+  };
+
+  // Auto-scroll to the left
+  useEffect(() => {
+    if (featuredItems.length > 3 && isAutoPlaying) {
+      const interval = setInterval(nextSlide, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [featuredItems.length, isAutoPlaying]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
+      {/* Hero Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="hero"
+      >
+        <div className="hero-content">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            Uni-Market
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            The exclusive peer-to-peer marketplace for the Asian Institute of Technology community. 
+            Buy, sell, and connect with fellow students, faculty, and staff.
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="flex justify-center space-x-4" 
+            style={{ flexWrap: 'wrap', gap: '1rem' }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link to="/sell" className="btn btn-secondary">
+                Start Selling
+              </Link>
+            </motion.div>
+            <motion.button 
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.95 }}
+              onClick={() => document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth' })}
+              className="btn" 
+              style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: '2px solid rgba(255,255,255,0.3)' }}
+            >
+              Browse Items
+            </motion.button>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      <FeaturesSection />
+
+      {/* Featured Items Carousel */}
+      {featuredItems.length > 0 && (
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          id="featured"
+          className="bg-gray-50 py-8" 
+          style={{ borderRadius: '1.5rem', padding: '4rem 2rem' }}
+        >
+          <div className="text-center mb-8">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}
+            >
+              Featured Items
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              style={{ color: '#6b7280', fontSize: '1.125rem' }}
+            >
+              Most popular products and services from our community
+            </motion.p>
+          </div>
+          
+          {/* Carousel Container */}
+          <div 
+            style={{ position: 'relative', overflow: 'hidden', maxWidth: '1200px', margin: '0 auto', padding: '0 60px' }}
+            onMouseEnter={() => setIsAutoPlaying(false)}
+            onMouseLeave={() => setIsAutoPlaying(true)}
+          >
+            {/* Left Arrow */}
+            <motion.button
+              whileHover={{ scale: 1.15, backgroundColor: '#2d8659' }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleManualNavigation('prev')}
+              style={{
+                position: 'absolute',
+                left: '0',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+                background: '#1a5f3f',
+                color: 'white',
+                border: '3px solid #fbbf24',
+                borderRadius: '50%',
+                width: '60px',
+                height: '60px',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+              }}
+            >
+              ◄
+            </motion.button>
+
+            {/* Carousel Track */}
+            <motion.div 
+              animate={{ x: `${-currentSlide * 320}px` }}
+              transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              style={{ 
+                display: 'flex', 
+                gap: '1.5rem',
+                width: 'fit-content'
+              }}
+            >
+              {featuredItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  style={{ minWidth: '300px', maxWidth: '300px' }}
+                  whileHover={{ scale: 1.05, zIndex: 10 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <ProductCard item={item} />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Right Arrow */}
+            <motion.button
+              whileHover={{ scale: 1.15, backgroundColor: '#2d8659' }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleManualNavigation('next')}
+              style={{
+                position: 'absolute',
+                right: '0',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+                background: '#1a5f3f',
+                color: 'white',
+                border: '3px solid #fbbf24',
+                borderRadius: '50%',
+                width: '60px',
+                height: '60px',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+              }}
+            >
+              ►
+            </motion.button>
+          </div>
+
+          {/* Dots Indicator */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem' }}>
+            {Array.from({ length: Math.max(1, featuredItems.length - 2) }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setCurrentSlide(i);
+                  setIsAutoPlaying(false);
+                  setTimeout(() => setIsAutoPlaying(true), 5000);
+                }}
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: currentSlide === i ? '#1a5f3f' : '#d1d5db',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }}
+              />
+            ))}
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-8"
+          >
+            <Link to="/browse" className="btn btn-primary">
+              View All Items
+            </Link>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* CTA Section - AIT Theme */}
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.8 }}
+        style={{ 
+          background: 'linear-gradient(135deg, #1a5f3f, #2d8659)', 
+          color: 'white', 
+          padding: '4rem 2rem', 
+          borderRadius: '1.5rem', 
+          textAlign: 'center' 
+        }}
+      >
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          style={{ fontSize: '1.875rem', fontWeight: 'bold', marginBottom: '1rem' }}
+        >
+          Ready to Join Our Community?
+        </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          style={{ fontSize: '1.25rem', marginBottom: '2rem', color: '#d1fae5' }}
+        >
+          Start buying and selling with trusted AIT community members today
+        </motion.p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="flex justify-center space-x-4" 
+          style={{ flexWrap: 'wrap', gap: '1rem' }}
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to="/sell" className="btn" style={{ background: 'white', color: '#1a5f3f', fontWeight: '600' }}>
+              List Your First Item
+            </Link>
+          </motion.div>
+          <motion.button 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            className="btn" 
+            style={{ border: '2px solid white', background: 'transparent', color: 'white' }}
+          >
+            Learn More
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default HomePage;

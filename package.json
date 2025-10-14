@@ -1,0 +1,14 @@
+{
+  "name": "uni-market",
+  "version": "1.0.0",
+  "description": "Peer-to-peer marketplace for AIT community",
+  "scripts": {
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start"
+  },
+  "keywords": ["marketplace", "ait", "peer-to-peer"],
+  "author": "HTUT KO KO",
+  "license": "MIT"
+}
