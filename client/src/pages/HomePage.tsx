@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import FeaturesSection from '../components/FeaturesSection';
@@ -8,21 +8,16 @@ import type { Item } from '../types';
 
 const HomePage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        setLoading(true);
         const response = await axios.get('/api/items');
         setItems(response.data);
       } catch (err) {
-        setError('Failed to fetch items. Please try again later.');
-      } finally {
-        setLoading(false);
+        console.error('Failed to fetch items:', err);
       }
     };
 
@@ -31,7 +26,7 @@ const HomePage: React.FC = () => {
 
   // Sort by views (popularity) and take top 6 for featured
   const featuredItems = items
-    .sort((a, b) => b.views - a.views)
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
     .slice(0, 6);
 
   const nextSlide = () => {
@@ -192,7 +187,7 @@ const HomePage: React.FC = () => {
                 width: 'fit-content'
               }}
             >
-              {featuredItems.map((item, index) => (
+              {featuredItems.map((item) => (
                 <motion.div
                   key={item.id}
                   style={{ minWidth: '300px', maxWidth: '300px' }}

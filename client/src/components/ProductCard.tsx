@@ -23,13 +23,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
   };
 
   const isEdited = item.updated_at && item.created_at && item.updated_at !== item.created_at;
+  const imageUrl = item.image_url || item.image || 'https://via.placeholder.com/300x200?text=No+Image';
+  const views = item.views || 0;
+  const tags = item.tags || [];
 
   return (
     <div className="card">
       {/* Image */}
       <div style={{ position: 'relative' }}>
         <img
-          src={item.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}
+          src={imageUrl}
           alt={item.title}
         />
         <div style={{ 
@@ -55,7 +58,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
           fontSize: '0.75rem',
           color: '#6b7280'
         }}>
-          👁 {item.views}
+          👁 {views}
         </div>
       </div>
 
@@ -67,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
 
         {/* Tags */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: '1rem' }}>
-          {item.tags?.slice(0, 3).map((tag, index) => (
+          {tags.slice(0, 3).map((tag: string, index: number) => (
             <span
               key={index}
               style={{
@@ -81,7 +84,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
               {tag}
             </span>
           ))}
-          {item.tags && item.tags.length > 3 && (
+          {tags.length > 3 && (
             <span style={{
               padding: '0.25rem 0.5rem',
               background: '#f3f4f6',
@@ -89,7 +92,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
               fontSize: '0.75rem',
               borderRadius: '9999px'
             }}>
-              +{item.tags.length - 3}
+              +{tags.length - 3}
             </span>
           )}
         </div>

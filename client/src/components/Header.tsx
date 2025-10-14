@@ -297,7 +297,7 @@ const Header: React.FC = () => {
         }}
       />
 
-      <style jsx>{`
+      <style>{`
         .nav-btn {
           color: white;
           text-decoration: none;

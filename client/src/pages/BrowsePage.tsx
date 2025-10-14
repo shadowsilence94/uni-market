@@ -12,14 +12,14 @@ const BrowsePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedNationality, setSelectedNationality] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const categories = ['All', 'Products', 'Services'];
   const nationalities = ['All', 'Vietnamese', 'Indian', 'Myanmar', 'Thai', 'Chinese', 'Japanese'];
   const itemsPerPage = 12; // 4 columns x 3 rows
 
   useEffect(() => {
-    const searchQuery = searchParams.get('search');
+    const searchQuery = searchParams.get('search') || undefined;
     const categoryParam = searchParams.get('category');
     
     if (categoryParam && categories.includes(categoryParam)) {
@@ -239,7 +239,7 @@ const BrowsePage: React.FC = () => {
         </>
       )}
 
-      <style jsx>{`
+      <style>{`
         @media (max-width: 1024px) {
           .responsive-grid {
             grid-template-columns: repeat(3, 1fr) !important;
