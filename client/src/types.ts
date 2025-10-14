@@ -1,4 +1,5 @@
 // This file contains shared type definitions for the application.
+// Updated for Vercel deployment
 
 export interface Item {
   id: number;
