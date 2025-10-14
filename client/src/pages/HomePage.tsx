@@ -5,6 +5,7 @@ import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import FeaturesSection from '../components/FeaturesSection';
 import type { Item } from '../types';
+import { API_BASE } from '../config';
 
 const HomePage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -14,10 +15,17 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get('/api/items');
-        setItems(response.data);
+        const response = await axios.get(`${API_BASE}/items`);
+        // Ensure we have an array
+        if (Array.isArray(response.data)) {
+          setItems(response.data);
+        } else {
+          console.error('API did not return an array:', response.data);
+          setItems([]);
+        }
       } catch (err) {
         console.error('Failed to fetch items:', err);
+        setItems([]);
       }
     };
 
@@ -25,9 +33,10 @@ const HomePage: React.FC = () => {
   }, []);
 
   // Sort by views (popularity) and take top 6 for featured
-  const featuredItems = items
-    .sort((a, b) => (b.views || 0) - (a.views || 0))
-    .slice(0, 6);
+  // Create a copy before sorting to avoid mutation
+  const featuredItems = Array.isArray(items) 
+    ? [...items].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 6)
+    : [];
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % Math.max(1, featuredItems.length - 2));

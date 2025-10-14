@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../config';
 
 interface User {
   id: number;
@@ -69,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post(`${API_BASE}/auth/login`, { email, password });
       const { user, token: authToken } = response.data;
       
       setCurrentUser(user);
@@ -85,7 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.post(`${API_BASE}/auth/register`, userData);
       const { user, token: authToken } = response.data;
       
       setCurrentUser(user);
@@ -101,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const mockLogin = async (userId: number) => {
     try {
-      const response = await axios.post('/api/auth/mock-login', { userId });
+      const response = await axios.post(`${API_BASE}/auth/mock-login`, { userId });
       const { user, token: authToken } = response.data;
       
       setCurrentUser(user);
