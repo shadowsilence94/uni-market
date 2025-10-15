@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config';
 
 interface AdminStats {
   totalUsers: number;
@@ -77,17 +78,18 @@ const AdminDashboard: React.FC = () => {
     try {
       setLoading(true);
       const [statsResponse, usersResponse, itemsResponse, verifyResponse] = await Promise.all([
-        axios.get('/api/analytics'),
-        axios.get('/api/users'),
-        axios.get('/api/items'),
-        axios.get('/api/verification-requests').catch(() => ({ data: [] }))
+        axios.get(`${API_BASE}/analytics`),
+        axios.get(`${API_BASE}/users`),
+        axios.get(`${API_BASE}/items`),
+        axios.get(`${API_BASE}/verification-requests`).catch(() => ({ data: [] }))
       ]);
       
       setStats(statsResponse.data);
-      setUsers(usersResponse.data);
-      setItems(itemsResponse.data);
-      setVerificationRequests(verifyResponse.data);
+      setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
+      setItems(Array.isArray(itemsResponse.data) ? itemsResponse.data : []);
+      setVerificationRequests(Array.isArray(verifyResponse.data) ? verifyResponse.data : []);
     } catch (err: any) {
+      console.error('Failed to fetch admin data:', err);
       setError(err.response?.data?.message || 'Failed to fetch admin data.');
     } finally {
       setLoading(false);
@@ -97,7 +99,7 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteUser = async (userId: number) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await axios.delete(`/api/users/${userId}`);
+      await axios.delete(`${API_BASE}/users/${userId}`);
       setSuccess('User deleted successfully');
       fetchData();
       setTimeout(() => setSuccess(null), 3000);
@@ -109,53 +111,58 @@ const AdminDashboard: React.FC = () => {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('/api/users', newUserForm);
+      await axios.post(`${API_BASE}/users`, newUserForm);
       setSuccess('User added successfully');
       setShowAddUserModal(false);
       setNewUserForm({ name: '', email: '', password: '', nationality: '', role: 'user' });
       fetchData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
+      console.error('Failed to add user:', err);
       setError(err.response?.data?.message || 'Failed to add user.');
     }
   };
 
   const handleApproveVerification = async (requestId: number) => {
     try {
-      await axios.put(`/api/verification-requests/${requestId}/approve`);
+      await axios.put(`${API_BASE}/verification-requests/${requestId}/approve`);
       setSuccess('User verified successfully');
       fetchData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
+      console.error('Failed to approve verification:', err);
       setError(err.response?.data?.message || 'Failed to approve verification.');
     }
   };
 
   const handleRejectVerification = async (requestId: number) => {
     try {
-      await axios.put(`/api/verification-requests/${requestId}/reject`);
+      await axios.put(`${API_BASE}/verification-requests/${requestId}/reject`);
       setSuccess('Verification request rejected');
       fetchData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
+      console.error('Failed to reject verification:', err);
       setError(err.response?.data?.message || 'Failed to reject verification.');
     }
   };
 
   const handleVerifyUser = async (userId: number) => {
     try {
-      await axios.put(`/api/users/${userId}/verify`);
+      await axios.put(`${API_BASE}/users/${userId}/verify`);
       fetchData();
     } catch (err: any) {
+      console.error('Failed to verify user:', err);
       setError(err.response?.data?.message || 'Failed to verify user.');
     }
   };
 
   const handleRoleChange = async (userId: number, newRole: string) => {
     try {
-      await axios.put(`/api/users/${userId}/role`, { role: newRole });
+      await axios.put(`${API_BASE}/users/${userId}/role`, { role: newRole });
       fetchData();
     } catch (err: any) {
+      console.error('Failed to update user role:', err);
       setError(err.response?.data?.message || 'Failed to update user role.');
     }
   };
@@ -163,9 +170,10 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteItem = async (itemId: number) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
-        await axios.delete(`/api/items/${itemId}`);
+        await axios.delete(`${API_BASE}/items/${itemId}`);
         fetchData();
       } catch (err: any) {
+        console.error('Failed to delete item:', err);
         setError(err.response?.data?.message || 'Failed to delete item.');
       }
     }
@@ -174,10 +182,11 @@ const AdminDashboard: React.FC = () => {
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('/api/notifications', notificationForm);
+      await axios.post(`${API_BASE}/notifications`, notificationForm);
       setNotificationForm({ title: '', message: '', userId: 'all' });
       alert('Notification sent successfully!');
     } catch (err: any) {
+      console.error('Failed to send notification:', err);
       setError(err.response?.data?.message || 'Failed to send notification.');
     }
   };

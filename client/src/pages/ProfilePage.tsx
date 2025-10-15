@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE } from '../config';
 
 interface Item {
   id: number;
@@ -75,13 +76,17 @@ const ProfilePage: React.FC = () => {
     if (!currentUser) return;
     try {
       setLoading(true);
-      const response = await axios.get('/api/items');
-      const myItems = response.data.filter((item: any) => 
-        item.sellerId === currentUser.id || item.seller_id === currentUser.id
-      );
+      const response = await axios.get(`${API_BASE}/items`);
+      const myItems = Array.isArray(response.data) 
+        ? response.data.filter((item: any) => 
+            item.sellerId === currentUser.id || item.seller_id === currentUser.id
+          )
+        : [];
       setUserItems(myItems);
     } catch (err) {
+      console.error('Failed to fetch items:', err);
       setError('Failed to fetch your items');
+      setUserItems([]);
     } finally {
       setLoading(false);
     }
@@ -90,9 +95,10 @@ const ProfilePage: React.FC = () => {
   const handleDeleteItem = async (itemId: number) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
-        await axios.delete(`/api/items/${itemId}`);
+        await axios.delete(`${API_BASE}/items/${itemId}`);
         fetchUserItems();
       } catch (err) {
+        console.error('Failed to delete item:', err);
         setError('Failed to delete item');
       }
     }
@@ -124,7 +130,7 @@ const ProfilePage: React.FC = () => {
     e.preventDefault();
     setError(null);
     try {
-      const response = await axios.put(`/api/users/${currentUser?.id}`, editForm);
+      const response = await axios.put(`${API_BASE}/users/${currentUser?.id}`, editForm);
       setCurrentUser(response.data);
       setSuccess('Profile updated successfully!');
       setShowEditModal(false);
@@ -147,7 +153,7 @@ const ProfilePage: React.FC = () => {
     }
 
     try {
-      await axios.post('/api/verification-requests', {
+      await axios.post(`${API_BASE}/verification-requests`, {
         userId: currentUser?.id,
         proof_document: verifyForm.proof_document,
         message: verifyForm.message

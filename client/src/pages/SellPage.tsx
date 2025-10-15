@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config';
 
 const SellPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -66,7 +67,7 @@ const SellPage: React.FC = () => {
         imageUrl = imagePreview; // Using data URL for demo
       }
 
-      await axios.post('/api/items', {
+      await axios.post(`${API_BASE}/items`, {
         title: formData.title,
         description: formData.description,
         price: priceInUSD,
@@ -80,6 +81,7 @@ const SellPage: React.FC = () => {
         navigate('/profile');
       }, 2000);
     } catch (err: any) {
+      console.error('Failed to list item:', err);
       setError(err.response?.data?.message || 'Failed to list item');
     } finally {
       setLoading(false);

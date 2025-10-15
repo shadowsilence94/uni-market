@@ -145,7 +145,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
         {/* Price and Button */}
         <div className="card-footer">
           <div className="price">
-            ฿{(item.price * 35).toFixed(0)}
+            ฿{((item.price || 0) * 35).toFixed(0)}
           </div>
           <Link 
             to={`/item/${item.id}`} 

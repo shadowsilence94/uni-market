@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
+import { API_BASE } from '../config';
 
 interface Item {
   id: number;
@@ -34,20 +35,34 @@ const ProductDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [contactMessage, setContactMessage] = useState('');
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     fetchItem();
-  }, [id]);
+    checkIfFavorite();
+  }, [id, currentUser]);
 
   const fetchItem = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/items/${id}`);
+      const response = await axios.get(`${API_BASE}/items/${id}`);
       setItem(response.data);
     } catch (err) {
+      console.error('Failed to fetch item:', err);
       setError('Item not found');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkIfFavorite = () => {
+    if (currentUser && id) {
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      setIsFavorite(favorites.includes(parseInt(id)));
     }
   };
 
@@ -59,7 +74,54 @@ const ProductDetailPage: React.FC = () => {
   const handleContactClick = () => {
     if (!currentUser) {
       setShowLoginModal(true);
+    } else {
+      setShowContactModal(true);
     }
+  };
+
+  const handleContactSeller = async () => {
+    if (!item || !currentUser) return;
+    
+    setActionLoading(true);
+    try {
+      await axios.post(`${API_BASE}/orders`, {
+        itemId: item.id,
+        message: contactMessage
+      });
+      setActionSuccess('Contact request sent! The seller will reach out to you via email.');
+      setShowContactModal(false);
+      setContactMessage('');
+      setTimeout(() => setActionSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Failed to contact seller:', err);
+      alert(err.response?.data?.message || 'Failed to send contact request. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    if (!currentUser) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const itemId = parseInt(id!);
+    
+    if (isFavorite) {
+      const newFavorites = favorites.filter((fav: number) => fav !== itemId);
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      setIsFavorite(false);
+      setActionSuccess('Removed from favorites');
+    } else {
+      favorites.push(itemId);
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      setIsFavorite(true);
+      setActionSuccess('Added to favorites');
+    }
+    
+    setTimeout(() => setActionSuccess(null), 3000);
   };
 
   if (loading) {
@@ -156,7 +218,7 @@ const ProductDetailPage: React.FC = () => {
               className="price" 
               style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}
             >
-              ฿{(item.price * 35).toFixed(0)}
+              ฿{((item.price || 0) * 35).toFixed(0)}
             </motion.div>
 
             <motion.p 
@@ -296,17 +358,24 @@ const ProductDetailPage: React.FC = () => {
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={handleContactClick}
                     className="btn btn-primary" 
                     style={{ flex: 1 }}
+                    disabled={item?.seller?.id === currentUser.id}
                   >
-                    Contact Seller
+                    {item?.seller?.id === currentUser.id ? 'Your Item' : 'Contact Seller'}
                   </motion.button>
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={handleToggleFavorite}
                     className="btn btn-secondary"
+                    style={{
+                      background: isFavorite ? '#fbbf24' : undefined,
+                      color: isFavorite ? 'white' : undefined
+                    }}
                   >
-                    Add to Favorites
+                    {isFavorite ? '★ Favorited' : '☆ Add to Favorites'}
                   </motion.button>
                 </>
               ) : (
@@ -321,9 +390,107 @@ const ProductDetailPage: React.FC = () => {
                 </motion.button>
               )}
             </motion.div>
+
+            {/* Success Message */}
+            {actionSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#d1fae5',
+                  border: '1px solid #10b981',
+                  borderRadius: '0.5rem',
+                  color: '#065f46',
+                  textAlign: 'center'
+                }}
+              >
+                ✓ {actionSuccess}
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Contact Seller Modal */}
+      {showContactModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}
+          onClick={() => setShowContactModal(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1f2937' }}>
+              Contact Seller
+            </h3>
+            <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+              Send a message to <strong>{item?.seller?.name}</strong> about this item.
+            </p>
+            <textarea
+              value={contactMessage}
+              onChange={(e) => setContactMessage(e.target.value)}
+              placeholder="Hi, I'm interested in this item. Is it still available?"
+              style={{
+                width: '100%',
+                minHeight: '120px',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                fontSize: '1rem',
+                marginBottom: '1rem',
+                resize: 'vertical'
+              }}
+            />
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                onClick={handleContactSeller}
+                disabled={!contactMessage.trim() || actionLoading}
+                className="btn btn-primary"
+                style={{ flex: 1, opacity: (!contactMessage.trim() || actionLoading) ? 0.5 : 1 }}
+              >
+                {actionLoading ? 'Sending...' : 'Send Message'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  setContactMessage('');
+                }}
+                className="btn"
+                style={{ background: '#e5e7eb', color: '#374151' }}
+              >
+                Cancel
+              </button>
+            </div>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem' }}>
+              💡 The seller will be notified via email and can contact you directly.
+            </p>
+          </motion.div>
+        </div>
+      )}
 
       {/* Login/Register Modals */}
       <LoginModal 

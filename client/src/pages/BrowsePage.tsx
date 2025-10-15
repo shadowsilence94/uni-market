@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 import type { Item } from '../types';
+import { API_BASE } from '../config';
 
 const BrowsePage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -38,11 +39,13 @@ const BrowsePage: React.FC = () => {
       if (selectedNationality !== 'All') params.append('nationality', selectedNationality);
       if (searchQuery) params.append('search', searchQuery);
 
-      const response = await axios.get(`/api/items?${params.toString()}`);
-      setItems(response.data);
+      const response = await axios.get(`${API_BASE}/items?${params.toString()}`);
+      setItems(Array.isArray(response.data) ? response.data : []);
       setCurrentPage(1);
     } catch (err) {
+      console.error('Failed to fetch items:', err);
       setError('Failed to fetch items. Please try again later.');
+      setItems([]);
     } finally {
       setLoading(false);
     }
