@@ -79,7 +79,7 @@ const Header: React.FC = () => {
             </form>
 
             {/* Mobile: Search + User/Auth (always visible) */}
-            <div className="md:hidden flex items-center space-x-2 flex-1 justify-center">
+            <div className="md:hidden flex items-center gap-3 flex-1 justify-end max-w-sm">
               <form onSubmit={handleSearch} className="flex-1 max-w-xs">
                 <div style={{ position: 'relative' }}>
                   <input 
@@ -87,20 +87,11 @@ const Header: React.FC = () => {
                     placeholder="Search..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ width: '100%', paddingRight: '2.5rem', fontSize: '0.875rem' }}
+                    className="mobile-search-input"
                   />
                   <button 
                     type="submit"
-                    style={{
-                      position: 'absolute',
-                      right: '0.5rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      color: 'white',
-                      cursor: 'pointer'
-                    }}
+                    className="mobile-search-button"
                   >
                     🔍
                   </button>
@@ -111,65 +102,30 @@ const Header: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Link 
                     to="/profile" 
-                    className="text-white text-xs whitespace-nowrap"
-                    style={{
-                      background: 'rgba(255,255,255,0.15)',
-                      padding: '0.4rem 0.6rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      textDecoration: 'none'
-                    }}
+                    className="mobile-user-button"
                   >
-                    👤 {currentUser.name.split(' ')[0]}
+                    👤
                   </Link>
                   <button 
                     onClick={logout}
-                    className="text-white text-xs"
-                    style={{
-                      background: '#6b7280',
-                      padding: '0.4rem 0.7rem',
-                      borderRadius: '0.5rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      fontWeight: '500'
-                    }}
+                    className="mobile-logout-button"
                   >
-                    Logout
+                    ⏻
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => setShowLoginModal(true)}
-                    className="text-white text-xs"
-                    style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      padding: '0.4rem 0.7rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      fontWeight: '500'
-                    }}
+                    className="mobile-auth-button"
                   >
                     Login
                   </button>
                   <button 
                     onClick={() => setShowRegisterModal(true)}
-                    className="text-white text-xs"
-                    style={{
-                      background: '#fbbf24',
-                      color: '#1f2937',
-                      padding: '0.4rem 0.7rem',
-                      borderRadius: '0.5rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      whiteSpace: 'nowrap'
-                    }}
+                    className="mobile-auth-button mobile-register-button"
                   >
-                    Register
+                    Join
                   </button>
                 </div>
               )}
@@ -343,6 +299,80 @@ const Header: React.FC = () => {
         }
         .mobile-nav-link:hover {
           color: #fbbf24;
+        }
+        
+        .mobile-search-input {
+          width: 100%;
+          padding-right: 2.5rem;
+          font-size: 0.875rem;
+          margin-right: 0.75rem;
+        }
+        
+        .mobile-search-button {
+          position: absolute;
+          right: 0.5rem;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+        }
+        
+        .mobile-user-button {
+          background: rgba(255,255,255,0.15);
+          padding: 0.4rem;
+          border-radius: 0.5rem;
+          border: 1px solid rgba(255,255,255,0.3);
+          text-decoration: none;
+          color: white;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 2rem;
+          height: 2rem;
+        }
+        
+        .mobile-logout-button {
+          background: #6b7280;
+          padding: 0.4rem;
+          border-radius: 0.5rem;
+          border: none;
+          cursor: pointer;
+          color: white;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 2rem;
+          height: 2rem;
+        }
+        
+        .mobile-auth-button {
+          background: rgba(255,255,255,0.2);
+          padding: 0.3rem 0.5rem;
+          border-radius: 0.5rem;
+          border: 1px solid rgba(255,255,255,0.3);
+          cursor: pointer;
+          color: white;
+          font-size: 0.75rem;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+        
+        .mobile-register-button {
+          background: #fbbf24;
+          color: #1f2937;
+          border: none;
+          font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+          .mobile-auth-button {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.7rem;
+          }
         }
       `}</style>
     </>

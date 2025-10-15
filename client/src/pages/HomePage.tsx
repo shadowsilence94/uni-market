@@ -183,7 +183,8 @@ const HomePage: React.FC = () => {
           
           {/* Carousel Container */}
           <div 
-            style={{ position: 'relative', overflow: 'hidden', maxWidth: '1200px', margin: '0 auto', padding: '0 60px' }}
+            style={{ position: 'relative', overflow: 'hidden', maxWidth: '1200px', margin: '0 auto' }}
+            className="carousel-container"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
           >
@@ -192,26 +193,7 @@ const HomePage: React.FC = () => {
               whileHover={{ scale: 1.15, backgroundColor: '#2d8659' }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleManualNavigation('prev')}
-              style={{
-                position: 'absolute',
-                left: '0',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                background: '#1a5f3f',
-                color: 'white',
-                border: '3px solid #fbbf24',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
-              }}
+              className="carousel-arrow carousel-arrow-left"
             >
               ◄
             </motion.button>
@@ -220,16 +202,12 @@ const HomePage: React.FC = () => {
             <motion.div 
               animate={{ x: `${-currentSlide * 320}px` }}
               transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              style={{ 
-                display: 'flex', 
-                gap: '1.5rem',
-                width: 'fit-content'
-              }}
+              className="carousel-track"
             >
               {featuredItems.map((item) => (
                 <motion.div
                   key={item.id}
-                  style={{ minWidth: '300px', maxWidth: '300px' }}
+                  className="carousel-item"
                   whileHover={{ scale: 1.05, zIndex: 10 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -243,26 +221,7 @@ const HomePage: React.FC = () => {
               whileHover={{ scale: 1.15, backgroundColor: '#2d8659' }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleManualNavigation('next')}
-              style={{
-                position: 'absolute',
-                right: '0',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                background: '#1a5f3f',
-                color: 'white',
-                border: '3px solid #fbbf24',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
-              }}
+              className="carousel-arrow carousel-arrow-right"
             >
               ►
             </motion.button>

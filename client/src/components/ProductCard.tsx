@@ -23,7 +23,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
   };
 
   const isEdited = item.updated_at && item.created_at && item.updated_at !== item.created_at;
-  const imageUrl = item.image_url || item.image || 'https://via.placeholder.com/300x200?text=No+Image';
+  const imageUrl = item.image_url || item.image || 'https://placehold.co/300x200/e5e7eb/6b7280?text=No+Image';
   const views = item.views || 0;
   const tags = item.tags || [];
 

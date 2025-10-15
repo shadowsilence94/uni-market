@@ -162,16 +162,11 @@ const BrowsePage: React.FC = () => {
         </motion.div>
       ) : (
         <>
-          {/* Products Grid - Fixed 4 columns */}
+          {/* Products Grid - Responsive */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '1.5rem'
-            }}
             className="responsive-grid"
           >
             {currentItems.map((item, index) => (

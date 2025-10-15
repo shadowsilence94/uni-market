@@ -355,7 +355,7 @@ const AdminDashboard: React.FC = () => {
               + Add User
             </button>
           </div>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
@@ -474,7 +474,7 @@ const AdminDashboard: React.FC = () => {
       {activeTab === 'items' && (
         <div className="admin-card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1.5rem' }}>Item Management</h3>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
