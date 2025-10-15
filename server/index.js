@@ -13,6 +13,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://uni-market-pi.vercel.app/',
+  'https://uni-market-git-main-htut-ko-kos-projects.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 

@@ -7,8 +7,15 @@ cd /Volumes/PS2000W/uni-market
 
 git add -A
 git commit -m "Fix: API endpoints, NaN prices, Contact Seller & Favorites"
+
+# Pull remote changes first (if any)
+git pull --rebase origin main
+
+# Then push
 git push origin main
 ```
+
+**If you get "rejected" error:** Run `git pull --rebase origin main` first, then push again.
 
 ## What Happens Next
 
