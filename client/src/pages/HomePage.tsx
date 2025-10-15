@@ -80,6 +80,36 @@ const HomePage: React.FC = () => {
         className="hero"
       >
         <div className="hero-content">
+          {/* Logo with Yellow Background */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '2rem'
+            }}
+          >
+            <div style={{
+              background: '#fbbf24',
+              padding: '1.5rem',
+              borderRadius: '1rem',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+            }}>
+              <img 
+                src="/logo.png" 
+                alt="Uni-Market Logo" 
+                style={{ 
+                  width: '120px', 
+                  height: '120px', 
+                  borderRadius: '0.75rem',
+                  objectFit: 'cover'
+                }}
+              />
+            </div>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

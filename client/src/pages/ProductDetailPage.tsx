@@ -294,20 +294,16 @@ const ProductDetailPage: React.FC = () => {
                   Seller Information
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                  <div style={{
-                    width: '3rem',
-                    height: '3rem',
-                    background: 'linear-gradient(135deg, #1a5f3f, #2d8659)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '1.25rem'
-                  }}>
-                    {item.seller.name.charAt(0).toUpperCase()}
-                  </div>
+                  <img
+                    src="/logo.png"
+                    alt={item.seller.name}
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                  />
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                       <span style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937' }}>

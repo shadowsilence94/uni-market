@@ -15,11 +15,19 @@ interface Item {
   created_at: string;
   updated_at: string;
   image_url?: string;
+  seller?: {
+    id: number;
+    name: string;
+    is_verified: boolean;
+    nationality: string;
+  };
 }
 
 const ProfilePage: React.FC = () => {
   const { currentUser, setCurrentUser } = useAuth();
   const [userItems, setUserItems] = useState<Item[]>([]);
+  const [favoriteItems, setFavoriteItems] = useState<Item[]>([]);
+  const [activeTab, setActiveTab] = useState<'items' | 'favorites'>('items');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -60,6 +68,7 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     fetchUserItems();
+    fetchFavoriteItems();
   }, []);
 
   useEffect(() => {
@@ -90,6 +99,34 @@ const ProfilePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchFavoriteItems = async () => {
+    if (!currentUser) return;
+    try {
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      if (favorites.length === 0) {
+        setFavoriteItems([]);
+        return;
+      }
+      
+      const response = await axios.get(`${API_BASE}/items`);
+      const allItems = Array.isArray(response.data) ? response.data : [];
+      const favItems = allItems.filter((item: any) => favorites.includes(item.id));
+      setFavoriteItems(favItems);
+    } catch (err) {
+      console.error('Failed to fetch favorite items:', err);
+      setFavoriteItems([]);
+    }
+  };
+
+  const handleRemoveFavorite = (itemId: number) => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const newFavorites = favorites.filter((id: number) => id !== itemId);
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+    fetchFavoriteItems();
+    setSuccess('Removed from favorites');
+    setTimeout(() => setSuccess(null), 3000);
   };
 
   const handleDeleteItem = async (itemId: number) => {
@@ -210,20 +247,17 @@ const ProfilePage: React.FC = () => {
               }}
             />
           ) : (
-            <div style={{
-              width: '5rem',
-              height: '5rem',
-              background: 'linear-gradient(135deg, #1a5f3f, #2d8659)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '2rem'
-            }}>
-              {currentUser.name.charAt(0).toUpperCase()}
-            </div>
+            <img 
+              src="/logo.png" 
+              alt={currentUser.name}
+              style={{
+                width: '5rem',
+                height: '5rem',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid #1a5f3f'
+              }}
+            />
           )}
           <div className="flex-1">
             <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>
@@ -270,8 +304,46 @@ const ProfilePage: React.FC = () => {
         </Link>
       </div>
 
-      {/* My Items */}
+      {/* Tabs */}
       <div className="admin-card">
+        <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
+          <button
+            onClick={() => setActiveTab('items')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: activeTab === 'items' ? '#1a5f3f' : '#6b7280',
+              borderBottom: activeTab === 'items' ? '3px solid #1a5f3f' : 'none',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: '-2px'
+            }}
+          >
+            My Items ({userItems.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('favorites')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: activeTab === 'favorites' ? '#1a5f3f' : '#6b7280',
+              borderBottom: activeTab === 'favorites' ? '3px solid #1a5f3f' : 'none',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: '-2px'
+            }}
+          >
+            ★ Favorites ({favoriteItems.length})
+          </button>
+        </div>
+
+      {/* My Items */}
+      {activeTab === 'items' && (
+        <div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}>
           My Listed Items
         </h2>
@@ -386,6 +458,103 @@ const ProfilePage: React.FC = () => {
             </table>
           </div>
         )}
+        </div>
+      )}
+
+      {/* Favorites */}
+      {activeTab === 'favorites' && (
+        <div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}>
+          ★ My Favorite Items
+        </h2>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="spinner"></div>
+          </div>
+        ) : favoriteItems.length === 0 ? (
+          <div className="text-center py-8">
+            <p style={{ color: '#6b7280', fontSize: '1.125rem' }}>
+              You haven't added any favorites yet.{' '}
+              <Link to="/browse" style={{ color: '#1a5f3f', fontWeight: '500' }}>
+                Browse items to add favorites!
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Seller</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {favoriteItems.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={item.image_url || 'https://via.placeholder.com/60x60?text=No+Image'}
+                          alt={item.title}
+                          style={{ width: '3rem', height: '3rem', objectFit: 'cover', borderRadius: '0.5rem' }}
+                        />
+                        <div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#1f2937' }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                            {item.description.substring(0, 50)}...
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '0.875rem', color: '#1f2937' }}>
+                        {item.seller?.name || 'Unknown'}
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{
+                        padding: '0.25rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        borderRadius: '9999px',
+                        background: item.category === 'Products' ? '#dcfce7' : '#dbeafe',
+                        color: item.category === 'Products' ? '#166534' : '#1e40af'
+                      }}>
+                        {item.category}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: '0.875rem', fontWeight: '500', color: '#1f2937' }}>
+                      ฿{((item.price || 0) * 35).toFixed(0)}
+                    </td>
+                    <td>
+                      <div className="flex gap-2">
+                        <Link to={`/item/${item.id}`} className="btn" style={{ fontSize: '0.75rem', padding: '0.5rem 1rem', background: '#1a5f3f', color: 'white' }}>
+                          View
+                        </Link>
+                        <button 
+                          onClick={() => handleRemoveFavorite(item.id)}
+                          className="btn" 
+                          style={{ fontSize: '0.75rem', padding: '0.5rem 1rem', background: '#ef4444', color: 'white' }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        </div>
+      )}
       </div>
 
       {/* Edit Profile Modal */}

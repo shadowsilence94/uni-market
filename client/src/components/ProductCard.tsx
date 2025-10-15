@@ -113,20 +113,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
         {item.seller && (
           <div className="seller-info">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{
-                width: '2rem',
-                height: '2rem',
-                background: 'linear-gradient(135deg, #1a5f3f, #2d8659)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '0.875rem'
-              }}>
-                {item.seller.name.charAt(0).toUpperCase()}
-              </div>
+              <img
+                src="/logo.png"
+                alt={item.seller.name}
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  borderRadius: '50%',
+                  objectFit: 'cover'
+                }}
+              />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#1f2937' }}>

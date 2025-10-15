@@ -33,7 +33,14 @@ const Header: React.FC = () => {
         <div className="container">
           <div className="flex justify-between items-center py-4">
             {/* Logo */}
-            <Link to="/" className="text-white">
+            <Link to="/" className="text-white" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <motion.img
+                src="/logo.png"
+                alt="Uni-Market Logo"
+                style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              />
               <motion.h1
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
