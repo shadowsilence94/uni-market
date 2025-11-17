@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useModal } from '../context/ModalContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from '../config';
 import ImageCropModal from '../components/ImageCropModal';
@@ -26,6 +27,7 @@ interface Item {
 
 const ProfilePage: React.FC = () => {
   const { currentUser, setCurrentUser } = useAuth();
+  const { openLoginModal } = useModal();
   const [userItems, setUserItems] = useState<Item[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<Item[]>([]);
   const [activeTab, setActiveTab] = useState<'items' | 'favorites' | 'notifications'>('items');
@@ -249,9 +251,28 @@ const ProfilePage: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="text-center py-8">
-        <p>Please log in to view your profile.</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-8"
+      >
+        <div className="admin-card" style={{ maxWidth: '500px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}>
+            Login Required
+          </h2>
+          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+            Please log in to view your profile.
+          </p>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={openLoginModal}
+            className="btn btn-primary"
+          >
+            Go to Login
+          </motion.button>
+        </div>
+      </motion.div>
     );
   }
 

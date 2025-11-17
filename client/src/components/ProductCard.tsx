@@ -9,6 +9,7 @@ interface ProductCardProps {
       name: string;
       is_verified: boolean;
       nationality: string;
+      profile_picture?: string;
     };
     created_at?: string;
     updated_at?: string;
@@ -69,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
         <p>{item.description}</p>
 
         {/* Tags */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: '1rem' }}>
+        <div className="item-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: '1rem', justifyContent: 'flex-start' }}>
           {tags.slice(0, 3).map((tag: string, index: number) => (
             <span
               key={index}
@@ -114,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
           <div className="seller-info">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <img
-                src="/logo.png"
+                src={item.seller.profile_picture || '/logo.png'}
                 alt={item.seller.name}
                 style={{
                   width: '2rem',

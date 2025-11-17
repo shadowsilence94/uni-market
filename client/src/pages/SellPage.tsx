@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useModal } from '../context/ModalContext';
 import { API_BASE } from '../config';
 import ImageCropModal from '../components/ImageCropModal';
+import TagAutocomplete from '../components/TagAutocomplete';
 
 const SellPage: React.FC = () => {
   const { currentUser } = useAuth();
+  const { openLoginModal } = useModal();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
@@ -114,7 +117,7 @@ const SellPage: React.FC = () => {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/')}
+            onClick={openLoginModal}
             className="btn btn-primary"
           >
             Go to Login
@@ -292,18 +295,11 @@ const SellPage: React.FC = () => {
               <label htmlFor="tags" className="form-label">
                 Tags
               </label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
+              <TagAutocomplete
                 value={formData.tags}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="e.g. handmade, gift, electronics (comma separated)"
+                onChange={(value) => setFormData({ ...formData, tags: value })}
+                category={formData.category}
               />
-              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                Separate tags with commas to help buyers find your item
-              </p>
             </motion.div>
           </div>
 

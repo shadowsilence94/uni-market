@@ -45,8 +45,36 @@
       "profile_picture": "",
       "is_ait_certified": false,
       "role": "admin",
-      "is_verified": false,
+      "is_verified": true,
       "created_at": "2025-11-17T08:52:16.700Z"
+    },
+    {
+      "id": 5,
+      "name": "test1",
+      "email": "test1@ait.asia",
+      "password": "$2b$10$0.2u30F85uo1kQSfiMC/2./oG51RwRLge3.NftsffrqxiKR8NmRWi",
+      "nationality": "Filipino",
+      "profile_picture": "",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": false,
+      "verification_token": "445c1a04-8f36-4590-90a4-2ed913372b3c",
+      "verification_expires": "2025-11-18T11:06:56.009Z",
+      "created_at": "2025-11-17T11:06:56.009Z"
+    },
+    {
+      "id": 6,
+      "name": "Test Login",
+      "email": "testlogin@ait.asia",
+      "password": "$2b$10$gPfC.4qPGdXojuG.B1KNXOSkUpIhLLgnwCB64QpyDV2SLfSD08ThK",
+      "nationality": "Thailand",
+      "profile_picture": "",
+      "is_ait_certified": true,
+      "role": "user",
+      "is_verified": false,
+      "verification_token": "13c307e0-5513-4da2-a4db-c0d49f93fe86",
+      "verification_expires": "2025-11-18T12:04:06.553Z",
+      "created_at": "2025-11-17T12:04:06.553Z"
     }
   ],
   "items": [
@@ -62,7 +90,7 @@
         "Card"
       ],
       "sellerId": 2,
-      "views": 162,
+      "views": 169,
       "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
       "created_at": "2025-01-05T10:30:00Z",
       "updated_at": "2025-01-05T10:30:00Z"
@@ -79,7 +107,7 @@
         "Logo"
       ],
       "sellerId": 2,
-      "views": 232,
+      "views": 237,
       "image_url": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
       "created_at": "2025-01-06T14:15:00Z",
       "updated_at": "2025-01-06T14:15:00Z"
@@ -96,7 +124,7 @@
         "University"
       ],
       "sellerId": 1,
-      "views": 472,
+      "views": 480,
       "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
       "created_at": "2025-01-07T09:20:00Z",
       "updated_at": "2025-01-08T16:45:00Z"
@@ -116,6 +144,20 @@
       "image_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=300&fit=crop",
       "created_at": "2025-01-08T11:00:00Z",
       "updated_at": "2025-01-08T11:00:00Z"
+    },
+    {
+      "id": 5,
+      "title": "test",
+      "description": "test",
+      "price": 28.571428571428573,
+      "category": "Products",
+      "tags": [
+        "Electronics",
+        "Powerbank"
+      ],
+      "sellerId": 1,
+      "views": 4,
+      "created_at": "2025-11-17T12:30:29.563Z"
     }
   ],
   "orders": [
@@ -232,7 +274,7 @@
       "title": "Contact from test",
       "message": "hello",
       "userId": 4,
-      "read": false,
+      "read": true,
       "created_at": "2025-11-17T08:59:10.265Z"
     },
     {
@@ -248,7 +290,7 @@
       "title": "testing897",
       "message": "tesing897",
       "userId": 4,
-      "read": false,
+      "read": true,
       "created_at": "2025-11-17T09:01:18.627Z"
     }
   ],
@@ -266,8 +308,16 @@
       "userId": 4,
       "proof_document": "data:image/png;base64,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",
       "message": "",
-      "status": "pending",
+      "status": "approved",
       "created_at": "2025-11-17T08:58:12.330Z"
+    },
+    {
+      "id": 3,
+      "userId": 4,
+      "proof_document": "data:image/png;base64,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",
+      "message": "",
+      "status": "approved",
+      "created_at": "2025-11-17T10:20:55.079Z"
     }
   ],
   "conversations": [
@@ -300,6 +350,16 @@
       "unread_count": 0,
       "created_at": "2025-11-17T09:01:57.362Z",
       "updated_at": "2025-11-17T09:02:22.428Z"
+    },
+    {
+      "id": 4,
+      "item_id": 2,
+      "buyer_id": 1,
+      "seller_id": 2,
+      "last_message": "hello",
+      "unread_count": 0,
+      "created_at": "2025-11-17T12:22:09.401Z",
+      "updated_at": "2025-11-17T12:22:23.077Z"
     }
   ],
   "messages": [
@@ -342,6 +402,14 @@
       "message": "hi what do you want",
       "read": false,
       "created_at": "2025-11-17T09:02:22.428Z"
+    },
+    {
+      "id": 6,
+      "conversation_id": 4,
+      "sender_id": 1,
+      "message": "hello",
+      "read": false,
+      "created_at": "2025-11-17T12:22:23.077Z"
     }
   ]
 }

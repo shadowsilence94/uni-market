@@ -15,8 +15,8 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Htut Ko Ko',
     role: 'Lead Developer',
-    github: 'https://github.com/htutkoko',
-    linkedin: 'https://linkedin.com/in/htutkoko'
+    github: 'https://github.com/shadowsilence94',
+    linkedin: 'https://www.linkedin.com/in/htut-ko-ko-805770202/'
   },
   {
     name: 'Prabidhi Pyakurel',

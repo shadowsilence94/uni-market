@@ -6,6 +6,11 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import { API_BASE } from '../config';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import CheckoutForm from '../components/CheckoutForm';
+
+const stripePromise = loadStripe('your_stripe_publishable_key'); // Replace with your key
 
 interface Item {
   id: number;
@@ -25,6 +30,7 @@ interface Item {
     email: string;
     is_verified: boolean;
     nationality: string;
+    profile_picture?: string;
   };
 }
 
@@ -41,11 +47,67 @@ const ProductDetailPage: React.FC = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   useEffect(() => {
     fetchItem();
     checkIfFavorite();
+    incrementViewCount();
   }, [id, currentUser]);
+
+  const handleBuyNowClick = async () => {
+    if (!currentUser) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (!item) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_BASE}/create-payment-intent`,
+        {
+          amount: item.price * 100, // Amount in cents
+          currency: 'thb',
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setClientSecret(response.data.clientSecret);
+      setShowPaymentModal(true);
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      alert('Error initiating payment. Please try again.');
+    }
+  };
+
+  const incrementViewCount = async () => {
+    if (!id) return;
+    
+    // Check if this user has already viewed this item in this session
+    const viewedItems = JSON.parse(sessionStorage.getItem('viewedItems') || '[]');
+    const itemIdNum = parseInt(id);
+    
+    if (viewedItems.includes(itemIdNum)) {
+      // Already viewed in this session, don't increment
+      return;
+    }
+    
+    try {
+      await axios.post(`${API_BASE}/items/${id}/view`);
+      
+      // Mark as viewed in this session
+      viewedItems.push(itemIdNum);
+      sessionStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+      
+      // Update the item views in state
+      setItem(prevItem => prevItem ? { ...prevItem, views: (prevItem.views || 0) + 1 } : null);
+    } catch (err) {
+      console.error('Failed to increment view count:', err);
+    }
+  };
 
   const fetchItem = async () => {
     try {
@@ -319,7 +381,7 @@ const ProductDetailPage: React.FC = () => {
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                   <img
-                    src="/logo.png"
+                    src={item.seller.profile_picture || '/logo.png'}
                     alt={item.seller.name}
                     style={{
                       width: '3rem',
@@ -371,7 +433,7 @@ const ProductDetailPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.1 }}
-              className="flex gap-4"
+              className="flex gap-4 action-buttons"
             >
               {currentUser ? (
                 <>
@@ -379,17 +441,27 @@ const ProductDetailPage: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleContactClick}
-                    className="btn btn-primary" 
+                    className="btn btn-primary action-button" 
                     style={{ flex: 1 }}
                     disabled={item?.seller?.id === currentUser.id}
                   >
                     {item?.seller?.id === currentUser.id ? 'Your Item' : 'Contact Seller'}
                   </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleBuyNowClick}
+                    className="btn btn-secondary action-button"
+                    style={{ flex: 1 }}
+                    disabled={item?.seller?.id === currentUser.id}
+                  >
+                    Buy Now
+                  </motion.button>
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleToggleFavorite}
-                    className="btn btn-secondary"
+                    className="btn btn-secondary action-button"
                     style={{
                       background: isFavorite ? '#fbbf24' : undefined,
                       color: isFavorite ? 'white' : undefined
@@ -403,7 +475,7 @@ const ProductDetailPage: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleContactClick}
-                  className="btn btn-primary" 
+                  className="btn btn-primary action-button" 
                   style={{ flex: 1 }}
                 >
                   Login to Contact Seller
@@ -508,6 +580,55 @@ const ProductDetailPage: React.FC = () => {
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem' }}>
               💡 The seller will be notified via email and can contact you directly.
             </p>
+          </motion.div>
+        </div>
+      )}
+
+      {showPaymentModal && clientSecret && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem',
+          }}
+          onClick={() => setShowPaymentModal(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1f2937' }}>
+              Complete Your Purchase
+            </h3>
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <CheckoutForm
+                clientSecret={clientSecret}
+                onPaymentSuccess={(paymentIntent) => {
+                  setActionSuccess(`Payment successful! Payment ID: ${paymentIntent.id}`);
+                  setShowPaymentModal(false);
+                }}
+                onPaymentError={(error) => {
+                  alert(`Payment failed: ${error}`);
+                }}
+              />
+            </Elements>
           </motion.div>
         </div>
       )}

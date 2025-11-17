@@ -13,17 +13,26 @@ const BrowsePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedNationality, setSelectedNationality] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['All', 'Products', 'Services', 'Food'];
   const nationalities = ['All', 'Vietnamese', 'Indian', 'Myanmar', 'Thai', 'Chinese', 'Japanese'];
   const itemsPerPage = 12; // 4 columns x 3 rows
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchParams({ search: searchQuery });
+  };
 
   useEffect(() => {
     const searchQuery = searchParams.get('search') || undefined;
     const categoryParam = searchParams.get('category');
     const tagParam = searchParams.get('tag');
     
+    if (searchQuery) {
+      setSearchQuery(searchQuery);
+    }
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     } else if (!tagParam) {
@@ -120,6 +129,20 @@ const BrowsePage: React.FC = () => {
         className="bg-white p-6 rounded-lg shadow-lg"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <form onSubmit={handleSearch} className="flex">
+              <input
+                type="search"
+                placeholder="Search here!!"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-input"
+              />
+              <button type="submit" className="btn btn-primary" style={{ marginLeft: '1rem' }}>
+                Search
+              </button>
+            </form>
+          </div>
           <div>
             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
               Category

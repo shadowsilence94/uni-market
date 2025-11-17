@@ -51,6 +51,9 @@ const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [verificationRequests, setVerificationRequests] = useState<any[]>([]);
+  const [tags, setTags] = useState<{ tag: string; count: number; category?: string }[]>([]);
+  const [editingTag, setEditingTag] = useState<string | null>(null);
+  const [editTagValue, setEditTagValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +75,10 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    if (activeTab === 'tags') {
+      fetchTags();
+    }
+  }, [activeTab]);
 
   const fetchData = async () => {
     try {
@@ -197,6 +203,95 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchTags = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_BASE}/tags/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTags(response.data || []);
+    } catch (err: any) {
+      console.error('Failed to fetch tags:', err);
+      setError(err.response?.data?.message || 'Failed to fetch tags.');
+    }
+  };
+
+  const handleDeleteTag = async (tag: string) => {
+    if (!confirm(`Delete tag "${tag}"? This will remove it from all items.`)) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE}/tags/${encodeURIComponent(tag)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSuccess(`Tag "${tag}" deleted successfully!`);
+      fetchTags();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      console.error('Failed to delete tag:', err);
+      setError(err.response?.data?.message || 'Failed to delete tag.');
+    }
+  };
+
+  const handleRenameTag = async (oldTag: string, newTag: string) => {
+    if (!newTag.trim()) {
+      alert('Please enter a new tag name.');
+      return;
+    }
+    
+    if (oldTag === newTag) {
+      setEditingTag(null);
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_BASE}/tags/merge`, {
+        sourceTag: oldTag,
+        targetTag: newTag
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSuccess(`Tag renamed from "${oldTag}" to "${newTag}" successfully!`);
+      setEditingTag(null);
+      setEditTagValue('');
+      fetchTags();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      console.error('Failed to rename tag:', err);
+      setError(err.response?.data?.message || 'Failed to rename tag.');
+    }
+  };
+
+  const handleMergeTags = async (sourceTag: string, targetTag: string) => {
+    if (!targetTag.trim()) {
+      alert('Please enter a target tag name.');
+      return;
+    }
+    
+    if (!confirm(`Merge "${sourceTag}" into "${targetTag}"? This will replace all occurrences.`)) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_BASE}/tags/merge`, {
+        sourceTag,
+        targetTag
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSuccess(`Tag "${sourceTag}" merged into "${targetTag}" successfully!`);
+      fetchTags();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      console.error('Failed to merge tags:', err);
+      setError(err.response?.data?.message || 'Failed to merge tags.');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -239,6 +334,7 @@ const AdminDashboard: React.FC = () => {
             { id: 'users', name: 'User Management', icon: '👥' },
             { id: 'verification', name: 'Verification Requests', icon: '✓', badge: verificationRequests.filter(r => r.status === 'pending').length },
             { id: 'items', name: 'Item Management', icon: '📦' },
+            { id: 'tags', name: 'Tag Management', icon: '🏷️' },
             { id: 'notifications', name: 'Notifications', icon: '📢' }
           ].map((tab) => (
             <button
@@ -556,6 +652,202 @@ const AdminDashboard: React.FC = () => {
       )}
 
       {/* Notifications Tab */}
+      {/* Tag Management Tab */}
+      {activeTab === 'tags' && (
+        <div className="admin-card">
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1.5rem' }}>
+            Tag Management
+          </h3>
+          
+          <p style={{ color: '#6b7280', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+            Manage tags used across all items. Merge duplicate tags or delete unused ones.
+          </p>
+
+          {tags.length === 0 ? (
+            <p style={{ color: '#6b7280', textAlign: 'center', padding: '2rem' }}>No tags found</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {tags.map((tagData, index) => (
+                <div 
+                  key={index} 
+                  style={{ 
+                    border: '1px solid #e5e7eb', 
+                    borderRadius: '0.5rem', 
+                    padding: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '1rem'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: '200px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      {editingTag === tagData.tag ? (
+                        <input
+                          type="text"
+                          value={editTagValue}
+                          onChange={(e) => setEditTagValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleRenameTag(tagData.tag, editTagValue);
+                            } else if (e.key === 'Escape') {
+                              setEditingTag(null);
+                              setEditTagValue('');
+                            }
+                          }}
+                          autoFocus
+                          style={{
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            padding: '0.25rem 0.75rem',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '9999px',
+                            outline: 'none'
+                          }}
+                        />
+                      ) : (
+                        <span style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: '600', 
+                          color: '#1f2937',
+                          padding: '0.25rem 0.75rem',
+                          background: '#f3f4f6',
+                          borderRadius: '9999px'
+                        }}>
+                          {tagData.tag}
+                        </span>
+                      )}
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: '#6b7280',
+                        background: '#dbeafe',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: '9999px'
+                      }}>
+                        {tagData.count} {tagData.count === 1 ? 'item' : 'items'}
+                      </span>
+                    </div>
+                    {tagData.category && (
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        Category: {tagData.category}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {editingTag === tagData.tag ? (
+                      <>
+                        <button
+                          onClick={() => handleRenameTag(tagData.tag, editTagValue)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingTag(null);
+                            setEditTagValue('');
+                          }}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#6b7280',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingTag(tagData.tag);
+                            setEditTagValue(tagData.tag);
+                          }}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#8b5cf6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Rename
+                        </button>
+                        <button
+                          onClick={() => {
+                            const targetTag = prompt(`Merge "${tagData.tag}" into which tag?`, '');
+                            if (targetTag) {
+                              handleMergeTags(tagData.tag, targetTag);
+                            }
+                          }}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Merge
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTag(tagData.tag)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f9fafb', borderRadius: '0.5rem' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
+              💡 Tag Management Tips
+            </h4>
+            <ul style={{ fontSize: '0.875rem', color: '#6b7280', paddingLeft: '1.5rem', margin: 0 }}>
+              <li>Merge similar tags to reduce duplicates (e.g., "electronic" → "electronics")</li>
+              <li>Delete unused tags to keep the system clean</li>
+              <li>Tags are automatically suggested when users create items</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'notifications' && (
         <div className="admin-card">
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1.5rem' }}>Send Notification</h3>

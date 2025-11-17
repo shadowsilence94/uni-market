@@ -125,6 +125,7 @@ const ChatWidget: React.FC = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
+        className="chat-float-button"
         style={{
           position: 'fixed',
           bottom: '2rem',
@@ -353,6 +354,9 @@ const ChatWidget: React.FC = () => {
               bottom: 0 !important;
               right: 0 !important;
               border-radius: 0 !important;
+            }
+            .chat-float-button {
+              display: none !important;
             }
           }
         `}</style>

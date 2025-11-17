@@ -6,10 +6,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { sendVerificationEmail, sendPurchaseConfirmation } = require('./emailService');
+const stripe = require('./stripe');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
 
 // CORS configuration for production
 const allowedOrigins = [
@@ -423,7 +425,8 @@ app.get('/api/items', (req, res) => {
         id: seller.id, 
         name: seller.name, 
         is_verified: seller.is_verified,
-        nationality: seller.nationality 
+        nationality: seller.nationality,
+        profile_picture: seller.profile_picture || ''
       } : null
     };
   });
@@ -431,7 +434,78 @@ app.get('/api/items', (req, res) => {
   res.json(items);
 });
 
-// Get tags by category
+// Get tag statistics (admin only) - Must be before /api/tags
+app.get('/api/tags/stats', authenticateToken, requireAdmin, (req, res) => {
+  const data = readData();
+  const tagStats = {};
+  
+  // Count tag usage across all items
+  data.items.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(tag => {
+        if (!tagStats[tag]) {
+          tagStats[tag] = { tag, count: 0, category: item.category };
+        }
+        tagStats[tag].count++;
+      });
+    }
+  });
+  
+  // Convert to array and sort by count
+  const tagArray = Object.values(tagStats).sort((a, b) => b.count - a.count);
+  res.json(tagArray);
+});
+
+// Merge tags (admin only)
+app.post('/api/tags/merge', authenticateToken, requireAdmin, (req, res) => {
+  const data = readData();
+  const { sourceTag, targetTag } = req.body;
+  let mergedCount = 0;
+  
+  if (!sourceTag || !targetTag) {
+    return res.status(400).json({ message: 'Source and target tags are required' });
+  }
+  
+  data.items.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      const hasSource = item.tags.includes(sourceTag);
+      if (hasSource) {
+        // Remove source tag
+        item.tags = item.tags.filter(tag => tag !== sourceTag);
+        // Add target tag if not already present
+        if (!item.tags.includes(targetTag)) {
+          item.tags.push(targetTag);
+        }
+        mergedCount++;
+      }
+    }
+  });
+  
+  writeData(data);
+  res.json({ message: `Merged "${sourceTag}" into "${targetTag}" in ${mergedCount} items`, mergedCount });
+});
+
+// Delete a tag from all items (admin only)
+app.delete('/api/tags/:tag', authenticateToken, requireAdmin, (req, res) => {
+  const data = readData();
+  const tagToDelete = decodeURIComponent(req.params.tag);
+  let deletedCount = 0;
+  
+  data.items.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      const originalLength = item.tags.length;
+      item.tags = item.tags.filter(tag => tag !== tagToDelete);
+      if (item.tags.length < originalLength) {
+        deletedCount++;
+      }
+    }
+  });
+  
+  writeData(data);
+  res.json({ message: `Tag removed from ${deletedCount} items`, deletedCount });
+});
+
+// Get tags by category - Must be last
 app.get('/api/tags', (req, res) => {
   const data = readData();
   const { category } = req.query;
@@ -456,10 +530,6 @@ app.get('/api/items/:id', (req, res) => {
     return res.status(404).json({ message: 'Item not found' });
   }
   
-  // Increment views
-  item.views += 1;
-  writeData(data);
-  
   // Add seller info
   const seller = data.users.find(u => u.id === item.sellerId);
   const itemWithSeller = {
@@ -469,11 +539,28 @@ app.get('/api/items/:id', (req, res) => {
       name: seller.name, 
       email: seller.email,
       is_verified: seller.is_verified,
-      nationality: seller.nationality 
+      nationality: seller.nationality,
+      profile_picture: seller.profile_picture || ''
     } : null
   };
   
   res.json(itemWithSeller);
+});
+
+// Increment view count for an item
+app.post('/api/items/:id/view', (req, res) => {
+  const data = readData();
+  const item = data.items.find(item => item.id === parseInt(req.params.id));
+  
+  if (!item) {
+    return res.status(404).json({ message: 'Item not found' });
+  }
+  
+  // Increment views
+  item.views = (item.views || 0) + 1;
+  writeData(data);
+  
+  res.json({ views: item.views });
 });
 
 app.post('/api/items', authenticateToken, (req, res) => {
@@ -692,6 +779,19 @@ app.post('/api/contact', authenticateToken, (req, res) => {
     message: 'Message sent successfully',
     notificationsSent: notifications.length 
   });
+});
+
+app.post('/api/create-payment-intent', authenticateToken, async (req, res) => {
+  const { amount, currency } = req.body;
+
+  try {
+    const paymentIntent = await stripe.createPaymentIntent(amount, currency);
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 });
 
 app.patch('/api/notifications/:id', authenticateToken, (req, res) => {

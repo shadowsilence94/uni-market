@@ -5,6 +5,12 @@
   box-sizing: border-box;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 html {
   overflow-x: hidden;
 }
@@ -16,6 +22,13 @@ body {
   background-color: #f8fafc;
   overflow-x: hidden;
   width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
 }
 
 /* Container */
@@ -253,6 +266,7 @@ body {
   right: 0;
   z-index: 100;
   width: 100%;
+  margin: 0;
 }
 
 /* Category Buttons - Full with text always visible */
@@ -409,7 +423,6 @@ body {
   background-color: #f8fafc;
   overflow-x: hidden;
   width: 100%;
-  padding-top: 80px;
 }
 
 @media (max-width: 768px) {
@@ -843,7 +856,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
   padding: 1rem;
 }
 
@@ -1139,5 +1152,14 @@ body {
   .carousel-item {
     min-width: 200px;
     max-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+  .action-button {
+    width: 100%;
   }
 }
