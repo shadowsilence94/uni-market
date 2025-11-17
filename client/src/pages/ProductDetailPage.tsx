@@ -620,11 +620,11 @@ const ProductDetailPage: React.FC = () => {
             <Elements stripe={stripePromise} options={{ clientSecret }}>
               <CheckoutForm
                 clientSecret={clientSecret}
-                onPaymentSuccess={(paymentIntent) => {
+                onPaymentSuccess={(paymentIntent: any) => {
                   setActionSuccess(`Payment successful! Payment ID: ${paymentIntent.id}`);
                   setShowPaymentModal(false);
                 }}
-                onPaymentError={(error) => {
+                onPaymentError={(error: string) => {
                   alert(`Payment failed: ${error}`);
                 }}
               />

@@ -29,6 +29,7 @@ interface User {
   is_verified: boolean;
   role: string;
   is_ait_certified: boolean;
+  profile_picture?: string;
 }
 
 interface Item {

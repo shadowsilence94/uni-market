@@ -13,7 +13,6 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
   const { currentUser, logout } = useAuth();
   const { showLoginModal, showRegisterModal, openLoginModal, closeLoginModal, openRegisterModal, closeRegisterModal } = useModal();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileCategoryMenu, setShowMobileCategoryMenu] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -891,7 +890,7 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
                         💰 Sell
                       </Link>
                       
-                      {currentUser.role === 'admin' && (
+                      {currentUser?.role === 'admin' && (
                         <Link to="/admin" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
                           ⚙️ Admin Dashboard
                         </Link>

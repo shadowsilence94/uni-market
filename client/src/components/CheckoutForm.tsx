@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { StripeCardElement } from '@stripe/stripe-js';
 
-const CheckoutForm = ({ clientSecret, onPaymentSuccess, onPaymentError }) => {
+interface CheckoutFormProps {
+  clientSecret: string;
+  onPaymentSuccess: (paymentIntent: any) => void;
+  onPaymentError: (error: string) => void;
+}
+
+const CheckoutForm = ({ clientSecret, onPaymentSuccess, onPaymentError }: CheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
@@ -15,14 +22,21 @@ const CheckoutForm = ({ clientSecret, onPaymentSuccess, onPaymentError }) => {
 
     setIsProcessing(true);
 
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      onPaymentError('Card element not found');
+      setIsProcessing(false);
+      return;
+    }
+
     const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
-        card: elements.getElement(CardElement),
+        card: cardElement as StripeCardElement,
       },
     });
 
     if (error) {
-      onPaymentError(error.message);
+      onPaymentError(error.message || 'Payment failed');
       setIsProcessing(false);
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       onPaymentSuccess(paymentIntent);
