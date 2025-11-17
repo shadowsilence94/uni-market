@@ -1,6 +1,17 @@
 // This file contains shared type definitions for the application.
 // Updated for Vercel deployment
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  nationality: string;
+  is_ait_certified: boolean;
+  role: string;
+  is_verified: boolean;
+  profile_picture?: string;
+}
+
 export interface Item {
   id: number;
   title: string;

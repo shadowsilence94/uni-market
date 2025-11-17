@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE } from '../config';
+import type { User } from '../types';
 
 interface AdminStats {
   totalUsers: number;
@@ -21,16 +22,7 @@ interface AdminStats {
   }>;
 }
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  nationality: string;
-  is_verified: boolean;
-  role: string;
-  is_ait_certified: boolean;
-  profile_picture?: string;
-}
+
 
 interface Item {
   id: number;

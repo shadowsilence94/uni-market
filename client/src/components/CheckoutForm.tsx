@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import type { StripeCardElement } from '@stripe/stripe-js';
 
 interface CheckoutFormProps {
   clientSecret: string;
@@ -31,7 +30,7 @@ const CheckoutForm = ({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
 
     const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
-        card: cardElement as StripeCardElement,
+        card: cardElement,
       },
     });
 
