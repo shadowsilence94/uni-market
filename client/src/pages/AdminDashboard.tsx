@@ -182,7 +182,13 @@ const AdminDashboard: React.FC = () => {
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_BASE}/notifications`, notificationForm);
+      await axios.post(`${API_BASE}/notifications`, notificationForm, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       setNotificationForm({ title: '', message: '', userId: 'all' });
       alert('Notification sent successfully!');
     } catch (err: any) {
@@ -375,15 +381,20 @@ const AdminDashboard: React.FC = () => {
                         <div style={{
                           width: '2.5rem',
                           height: '2.5rem',
-                          background: 'linear-gradient(135deg, #1a5f3f, #2d8659)',
+                          background: user.profile_picture 
+                            ? `url(${user.profile_picture})` 
+                            : 'linear-gradient(135deg, #1a5f3f, #2d8659)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
                           borderRadius: '50%',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           color: 'white',
-                          fontWeight: 'bold'
+                          fontWeight: 'bold',
+                          border: '2px solid #e5e7eb'
                         }}>
-                          {user.name.charAt(0).toUpperCase()}
+                          {!user.profile_picture && user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#1f2937' }}>{user.name}</div>

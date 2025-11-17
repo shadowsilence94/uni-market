@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from '../config';
+import ImageCropModal from '../components/ImageCropModal';
 
 interface Item {
   id: number;
@@ -27,12 +28,15 @@ const ProfilePage: React.FC = () => {
   const { currentUser, setCurrentUser } = useAuth();
   const [userItems, setUserItems] = useState<Item[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<Item[]>([]);
-  const [activeTab, setActiveTab] = useState<'items' | 'favorites'>('items');
+  const [activeTab, setActiveTab] = useState<'items' | 'favorites' | 'notifications'>('items');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState<string>('');
   const [editForm, setEditForm] = useState({
     name: currentUser?.name || '',
     nationality: currentUser?.nationality || '',
@@ -69,6 +73,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     fetchUserItems();
     fetchFavoriteItems();
+    fetchNotifications();
   }, []);
 
   useEffect(() => {
@@ -120,6 +125,31 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.get(`${API_BASE}/notifications`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setNotifications(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+      setNotifications([]);
+    }
+  };
+
+  const markNotificationAsRead = async (notificationId: number) => {
+    try {
+      await axios.patch(`${API_BASE}/notifications/${notificationId}`, 
+        { read: true },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
   const handleRemoveFavorite = (itemId: number) => {
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     const newFavorites = favorites.filter((id: number) => id !== itemId);
@@ -146,10 +176,16 @@ const ProfilePage: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditForm({ ...editForm, profile_picture: reader.result as string });
+        setTempImageSrc(reader.result as string);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImageUrl: string) => {
+    setEditForm({ ...editForm, profile_picture: croppedImageUrl });
+    setShowCropModal(false);
   };
 
   const handleProofChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -338,6 +374,23 @@ const ProfilePage: React.FC = () => {
             }}
           >
             ★ Favorites ({favoriteItems.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: activeTab === 'notifications' ? '#1a5f3f' : '#6b7280',
+              borderBottom: activeTab === 'notifications' ? '3px solid #1a5f3f' : 'none',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: '-2px',
+              position: 'relative'
+            }}
+          >
+            🔔 Notifications ({notifications.filter(n => !n.read).length})
           </button>
         </div>
 
@@ -555,6 +608,66 @@ const ProfilePage: React.FC = () => {
         )}
         </div>
       )}
+
+      {/* Notifications */}
+      {activeTab === 'notifications' && (
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}>
+            🔔 Notifications
+          </h2>
+
+          {notifications.length === 0 ? (
+            <div className="text-center py-8">
+              <p style={{ color: '#6b7280', fontSize: '1.125rem' }}>
+                You have no notifications.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {notifications.map((notif) => (
+                <motion.div
+                  key={notif.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    padding: '1.5rem',
+                    background: notif.read ? 'white' : '#f0fdf4',
+                    borderRadius: '0.75rem',
+                    border: notif.read ? '1px solid #e5e7eb' : '2px solid #10b981',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => !notif.read && markNotificationAsRead(notif.id)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937' }}>
+                      {notif.title}
+                    </h3>
+                    {!notif.read && (
+                      <span style={{
+                        background: '#10b981',
+                        color: 'white',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600'
+                      }}>
+                        NEW
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ color: '#6b7280', fontSize: '1rem', marginBottom: '0.75rem', lineHeight: '1.5' }}>
+                    {notif.message}
+                  </p>
+                  <div style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
+                    {new Date(notif.created_at).toLocaleString()}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       </div>
 
       {/* Edit Profile Modal */}
@@ -675,6 +788,16 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        imageSrc={tempImageSrc}
+        onClose={() => setShowCropModal(false)}
+        onCropComplete={handleCropComplete}
+        aspectRatio={1}
+        circularCrop={true}
+      />
     </div>
   );
 };

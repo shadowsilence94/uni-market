@@ -8,9 +8,12 @@ import ProfilePage from './pages/ProfilePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import HelpCenter from './pages/HelpCenter';
 import SafetyGuidelines from './pages/SafetyGuidelines';
+import AboutUs from './pages/AboutUs';
+import EmailVerification from './pages/EmailVerification';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ChatWidget from './components/ChatWidget';
 
 function App() {
   return (
@@ -22,6 +25,8 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/browse" element={<BrowsePage />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/verify-email" element={<EmailVerification />} />
               <Route path="/help" element={<HelpCenter />} />
               <Route path="/safety" element={<SafetyGuidelines />} />
               <Route element={<ProtectedRoute />}>
@@ -33,6 +38,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <ChatWidget />
         </div>
       </Router>
     </AuthProvider>

@@ -255,6 +255,152 @@ body {
   width: 100%;
 }
 
+/* Category Buttons - Full with text always visible */
+.category-btn-full {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.category-btn-full:hover {
+  background: rgba(251, 191, 36, 0.3);
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+  .category-btn-full {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Category Dropdown Wrapper */
+.category-dropdown-wrapper {
+  position: relative;
+}
+
+/* Category Dropdown Menu */
+.category-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background: white;
+  border: 2px solid #1a5f3f;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  min-width: 200px;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.category-dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #1f2937 !important;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-bottom: 1px solid #f3f4f6;
+  background: white;
+}
+
+.category-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.category-dropdown-item:hover {
+  background: #f0fdf4;
+  color: #1a5f3f !important;
+  padding-left: 1.25rem;
+  font-weight: 600;
+}
+
+/* Category Buttons */
+.category-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.category-btn:hover {
+  background: rgba(251, 191, 36, 0.3);
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+}
+
+/* Category Button - Icon Only (Mobile) */
+.category-btn-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.category-btn-icon:hover {
+  background: rgba(251, 191, 36, 0.3);
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+  .category-btn-icon {
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+  }
+}
+
+.category-label {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.category-btn:hover .category-label,
+.category-btn-icon:hover .category-label {
+  opacity: 1;
+}
+
 /* Add padding to body to account for fixed header */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;

@@ -29,7 +29,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
+*.md
 # Temporary files
 tmp/
 temp/

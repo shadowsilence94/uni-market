@@ -18,6 +18,7 @@ interface Item {
   created_at: string;
   updated_at: string;
   image_url?: string;
+  sellerId?: number;
   seller?: {
     id: number;
     name: string;
@@ -74,27 +75,50 @@ const ProductDetailPage: React.FC = () => {
   const handleContactClick = () => {
     if (!currentUser) {
       setShowLoginModal(true);
+    } else if (!currentUser.is_verified) {
+      alert('⚠️ Please verify your email before contacting sellers. Check your inbox for the verification link.');
     } else {
-      setShowContactModal(true);
+      // Create/open conversation with seller
+      handleContactSeller();
     }
   };
 
   const handleContactSeller = async () => {
     if (!item || !currentUser) return;
     
+    // Get seller ID from either sellerId or seller.id
+    const sellerId = item.sellerId || item.seller?.id;
+    
+    if (!sellerId) {
+      alert('Unable to contact seller. Seller information is missing.');
+      console.error('Item structure:', item);
+      return;
+    }
+    
     setActionLoading(true);
     try {
-      await axios.post(`${API_BASE}/orders`, {
-        itemId: item.id,
-        message: contactMessage
+      const token = localStorage.getItem('token');
+      console.log('Creating conversation:', {
+        item_id: item.id,
+        seller_id: sellerId,
+        item_title: item.title
       });
-      setActionSuccess('Contact request sent! The seller will reach out to you via email.');
-      setShowContactModal(false);
-      setContactMessage('');
+      
+      // Create conversation
+      const response = await axios.post(`${API_BASE}/conversations`, {
+        item_id: item.id,
+        seller_id: sellerId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log('Conversation created:', response.data);
+      setActionSuccess('✅ Conversation started! Check the chat widget at the bottom-right to send a message.');
       setTimeout(() => setActionSuccess(null), 5000);
     } catch (err: any) {
-      console.error('Failed to contact seller:', err);
-      alert(err.response?.data?.message || 'Failed to send contact request. Please try again.');
+      console.error('Failed to start conversation:', err);
+      console.error('Error response:', err.response?.data);
+      alert(err.response?.data?.message || 'Failed to start conversation. Please try again.');
     } finally {
       setActionLoading(false);
     }

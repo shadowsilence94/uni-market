@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE } from '../config';
+import ImageCropModal from '../components/ImageCropModal';
 
 const SellPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -22,6 +23,8 @@ const SellPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -36,10 +39,16 @@ const SellPage: React.FC = () => {
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
+        setTempImageSrc(e.target?.result as string);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImageUrl: string) => {
+    setImagePreview(croppedImageUrl);
+    setShowCropModal(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -209,6 +218,7 @@ const SellPage: React.FC = () => {
               >
                 <option value="Products">Products</option>
                 <option value="Services">Services</option>
+                <option value="Food">Food</option>
               </select>
             </motion.div>
           </div>
@@ -450,6 +460,16 @@ const SellPage: React.FC = () => {
           <li style={{ marginBottom: '0.5rem' }}>• Price competitively based on condition and market value</li>
         </ul>
       </motion.div>
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        imageSrc={tempImageSrc}
+        onClose={() => setShowCropModal(false)}
+        onCropComplete={handleCropComplete}
+        aspectRatio={4 / 3}
+        circularCrop={false}
+      />
     </motion.div>
   );
 };

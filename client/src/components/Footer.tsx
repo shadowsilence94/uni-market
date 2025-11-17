@@ -61,6 +61,14 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  to="/browse?category=Food"
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
+                  Food
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/sell"
                   className="text-gray-300 hover:text-white transition-colors duration-300"
                 >
@@ -90,6 +98,14 @@ const Footer: React.FC = () => {
             <ul className="space-y-3 text-sm mb-4">
               <li>
                 <Link
+                  to="/about"
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/help"
                   className="text-gray-300 hover:text-white transition-colors duration-300"
                 >
@@ -110,14 +126,6 @@ const Footer: React.FC = () => {
                   className="text-gray-300 hover:text-white transition-colors duration-300"
                 >
                   Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/browse"
-                  className="text-gray-300 hover:text-white transition-colors duration-300"
-                >
-                  Privacy Policy
                 </Link>
               </li>
             </ul>

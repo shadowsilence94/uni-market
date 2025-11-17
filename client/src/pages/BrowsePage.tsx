@@ -15,22 +15,37 @@ const BrowsePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams] = useSearchParams();
 
-  const categories = ['All', 'Products', 'Services'];
+  const categories = ['All', 'Products', 'Services', 'Food'];
   const nationalities = ['All', 'Vietnamese', 'Indian', 'Myanmar', 'Thai', 'Chinese', 'Japanese'];
   const itemsPerPage = 12; // 4 columns x 3 rows
 
   useEffect(() => {
     const searchQuery = searchParams.get('search') || undefined;
     const categoryParam = searchParams.get('category');
+    const tagParam = searchParams.get('tag');
     
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
+    } else if (!tagParam) {
+      // Only reset to 'All' if no tag is being filtered
+      setSelectedCategory('All');
     }
     
-    fetchItems(searchQuery);
-  }, [selectedCategory, selectedNationality, searchParams]);
+    fetchItems(searchQuery, tagParam || undefined);
+  }, [searchParams]);
 
-  const fetchItems = async (searchQuery?: string) => {
+  // Watch for filter changes (when user manually changes dropdowns)
+  useEffect(() => {
+    const searchQuery = searchParams.get('search') || undefined;
+    const tagParam = searchParams.get('tag');
+    
+    // Only fetch if not from URL params (user interaction)
+    if (!tagParam) {
+      fetchItems(searchQuery, undefined);
+    }
+  }, [selectedCategory, selectedNationality]);
+
+  const fetchItems = async (searchQuery?: string, tagQuery?: string) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -38,6 +53,7 @@ const BrowsePage: React.FC = () => {
       if (selectedCategory !== 'All') params.append('category', selectedCategory);
       if (selectedNationality !== 'All') params.append('nationality', selectedNationality);
       if (searchQuery) params.append('search', searchQuery);
+      if (tagQuery) params.append('tag', tagQuery);
 
       const response = await axios.get(`${API_BASE}/items?${params.toString()}`);
       setItems(Array.isArray(response.data) ? response.data : []);
@@ -70,17 +86,26 @@ const BrowsePage: React.FC = () => {
       {/* Header */}
       <div className="text-center">
         <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, x: -100, scale: 0.8 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ 
+            delay: 0.2,
+            type: "spring",
+            stiffness: 120,
+            damping: 12
+          }}
           style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}
         >
           Browse Marketplace
         </motion.h1>
         <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ 
+            delay: 0.3,
+            type: "spring",
+            stiffness: 100
+          }}
           style={{ color: '#6b7280', fontSize: '1.125rem' }}
         >
           Discover products and services from the AIT community

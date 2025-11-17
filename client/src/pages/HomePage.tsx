@@ -111,16 +111,26 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ 
+              delay: 0.3, 
+              duration: 0.8,
+              type: "spring",
+              stiffness: 100
+            }}
           >
             Uni-Market
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ 
+              delay: 0.5, 
+              duration: 0.8,
+              type: "spring",
+              stiffness: 80
+            }}
           >
             The exclusive peer-to-peer marketplace for the Asian Institute of Technology community. 
             Buy, sell, and connect with fellow students, faculty, and staff.
@@ -152,6 +162,114 @@ const HomePage: React.FC = () => {
 
       <FeaturesSection />
 
+      {/* Category Navigation Buttons */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.6 }}
+        className="text-center"
+      >
+        <motion.h2 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ 
+            delay: 0.4, 
+            duration: 0.6,
+            type: "spring",
+            stiffness: 120
+          }}
+          style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}
+        >
+          Browse by Category
+        </motion.h2>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          gap: '1rem', 
+          maxWidth: '800px', 
+          margin: '0 auto',
+          flexWrap: 'wrap'
+        }}>
+          <Link to="/browse?category=Products" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              style={{ 
+                border: '2px solid #e5e7eb', 
+                transition: 'all 0.3s',
+                padding: '1.5rem',
+                aspectRatio: '1/1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📦</div>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
+                Products
+              </h3>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
+                Physical goods
+              </p>
+            </motion.div>
+          </Link>
+
+          <Link to="/browse?category=Services" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              style={{ 
+                border: '2px solid #e5e7eb', 
+                transition: 'all 0.3s',
+                padding: '1.5rem',
+                aspectRatio: '1/1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛠️</div>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
+                Services
+              </h3>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
+                Skills & assistance
+              </p>
+            </motion.div>
+          </Link>
+
+          <Link to="/browse?category=Food" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              style={{ 
+                border: '2px solid #e5e7eb', 
+                transition: 'all 0.3s',
+                padding: '1.5rem',
+                aspectRatio: '1/1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🍜</div>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
+                Food
+              </h3>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
+                Meals & ingredients
+              </p>
+            </motion.div>
+          </Link>
+        </div>
+      </motion.div>
+
       {/* Featured Items Carousel */}
       {featuredItems.length > 0 && (
         <motion.div 
@@ -164,17 +282,27 @@ const HomePage: React.FC = () => {
         >
           <div className="text-center mb-8">
             <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ 
+                delay: 0.5,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
               style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}
             >
               Featured Items
             </motion.h2>
             <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ 
+                delay: 0.6,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
               style={{ color: '#6b7280', fontSize: '1.125rem' }}
             >
               Most popular products and services from our community

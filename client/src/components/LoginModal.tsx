@@ -105,12 +105,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToRegi
               </button>
             </p>
           </div>
-
-          <div style={{ marginTop: '1rem', padding: '1rem', background: '#f9fafb', borderRadius: '0.5rem' }}>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>Demo Credentials:</p>
-            <p style={{ fontSize: '0.75rem', color: '#374151' }}>Admin: st126010@ait.asia / Htutkoko@17</p>
-            <p style={{ fontSize: '0.75rem', color: '#374151' }}>User: user@ait.asia / password</p>
-          </div>
         </div>
       </div>
     </div>
