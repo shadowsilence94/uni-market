@@ -90,7 +90,7 @@
         "Card"
       ],
       "sellerId": 2,
-      "views": 169,
+      "views": 173,
       "image_url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
       "created_at": "2025-01-05T10:30:00Z",
       "updated_at": "2025-01-05T10:30:00Z"
@@ -107,7 +107,7 @@
         "Logo"
       ],
       "sellerId": 2,
-      "views": 237,
+      "views": 241,
       "image_url": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
       "created_at": "2025-01-06T14:15:00Z",
       "updated_at": "2025-01-06T14:15:00Z"
@@ -124,7 +124,7 @@
         "University"
       ],
       "sellerId": 1,
-      "views": 480,
+      "views": 482,
       "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
       "created_at": "2025-01-07T09:20:00Z",
       "updated_at": "2025-01-08T16:45:00Z"
@@ -340,26 +340,6 @@
       "unread_count": 0,
       "created_at": "2025-11-15T13:10:15.255Z",
       "updated_at": "2025-11-15T13:10:24.409Z"
-    },
-    {
-      "id": 3,
-      "item_id": 3,
-      "buyer_id": 2,
-      "seller_id": 1,
-      "last_message": "hi what do you want",
-      "unread_count": 0,
-      "created_at": "2025-11-17T09:01:57.362Z",
-      "updated_at": "2025-11-17T09:02:22.428Z"
-    },
-    {
-      "id": 4,
-      "item_id": 2,
-      "buyer_id": 1,
-      "seller_id": 2,
-      "last_message": "hello",
-      "unread_count": 0,
-      "created_at": "2025-11-17T12:22:09.401Z",
-      "updated_at": "2025-11-17T12:22:23.077Z"
     }
   ],
   "messages": [
@@ -386,30 +366,6 @@
       "message": "hello",
       "read": false,
       "created_at": "2025-11-15T13:10:24.409Z"
-    },
-    {
-      "id": 4,
-      "conversation_id": 3,
-      "sender_id": 2,
-      "message": "hello",
-      "read": false,
-      "created_at": "2025-11-17T09:02:05.432Z"
-    },
-    {
-      "id": 5,
-      "conversation_id": 3,
-      "sender_id": 1,
-      "message": "hi what do you want",
-      "read": false,
-      "created_at": "2025-11-17T09:02:22.428Z"
-    },
-    {
-      "id": 6,
-      "conversation_id": 4,
-      "sender_id": 1,
-      "message": "hello",
-      "read": false,
-      "created_at": "2025-11-17T12:22:23.077Z"
     }
   ]
 }

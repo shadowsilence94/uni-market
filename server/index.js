@@ -962,22 +962,26 @@ app.get('/api/conversations', authenticateToken, (req, res) => {
 app.post('/api/conversations', authenticateToken, (req, res) => {
   try {
     const { item_id, seller_id } = req.body;
+    console.log('Creating conversation request:', { item_id, seller_id, user_id: req.user.id });
     const data = readData();
     
     // Validate input
     if (!item_id || !seller_id) {
+      console.log('Missing required fields:', { item_id, seller_id });
       return res.status(400).json({ message: 'Missing item_id or seller_id' });
     }
     
     // Check if item exists
     const item = data.items.find(i => i.id === item_id);
     if (!item) {
+      console.log('Item not found:', item_id);
       return res.status(404).json({ message: 'Item not found' });
     }
     
     // Check if seller exists
     const seller = data.users.find(u => u.id === seller_id);
     if (!seller) {
+      console.log('Seller not found:', seller_id);
       return res.status(404).json({ message: 'Seller not found' });
     }
     
@@ -1093,6 +1097,39 @@ app.post('/api/conversations/:id/messages', authenticateToken, (req, res) => {
   writeData(data);
   
   res.json(newMessage);
+});
+
+// Delete conversation (for existing chat widget)
+app.delete('/api/conversations/:id', authenticateToken, (req, res) => {
+  const conversationId = parseInt(req.params.id);
+  const data = readData();
+  
+  if (!data.messages) data.messages = [];
+  if (!data.conversations) data.conversations = [];
+  
+  // Find conversation
+  const conversationIndex = data.conversations.findIndex(c => c.id === conversationId);
+  
+  if (conversationIndex === -1) {
+    return res.status(404).json({ message: 'Conversation not found' });
+  }
+  
+  const conversation = data.conversations[conversationIndex];
+  
+  // Check if user is part of this conversation
+  if (conversation.buyer_id !== req.user.id && conversation.seller_id !== req.user.id) {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+  
+  // Delete all messages in this conversation
+  data.messages = data.messages.filter(m => m.conversation_id !== conversation.id);
+  
+  // Delete conversation
+  data.conversations.splice(conversationIndex, 1);
+  
+  writeData(data);
+  
+  res.json({ message: 'Conversation deleted successfully' });
 });
 
 app.listen(PORT, () => {

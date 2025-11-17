@@ -114,6 +114,23 @@ const ChatWidget: React.FC = () => {
     fetchConversations();
   };
 
+  const deleteConversation = async (conversationId: number) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE}/conversations/${conversationId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSelectedConversation(null);
+      setMessages([]);
+      await fetchConversations(); // Refresh the conversations list
+    } catch (err) {
+      console.error('Failed to delete conversation:', err);
+      alert('Failed to delete conversation');
+    }
+  };
+
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unread_count, 0);
 
   if (!currentUser) return null;
@@ -220,6 +237,17 @@ const ChatWidget: React.FC = () => {
             {selectedConversation ? (
               /* Messages View */
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                {/* Messages Header with Delete */}
+                <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Re: {selectedConversation.item_title}</span>
+                  <button
+                    onClick={() => deleteConversation(selectedConversation.id)}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.875rem' }}
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
+                
                 {/* Messages List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
                   {messages.length === 0 ? (

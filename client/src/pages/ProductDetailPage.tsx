@@ -180,7 +180,8 @@ const ProductDetailPage: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to start conversation:', err);
       console.error('Error response:', err.response?.data);
-      alert(err.response?.data?.message || 'Failed to start conversation. Please try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to start conversation. Please try again.';
+      alert(`Error: ${errorMessage}`);
     } finally {
       setActionLoading(false);
     }
