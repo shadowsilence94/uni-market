@@ -83,6 +83,20 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
     }
   };
 
+  const markNotificationAsRead = async (notificationId: number) => {
+    try {
+      await axios.put(`${API_BASE}/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      );
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -444,6 +458,7 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
                                                     cursor: 'pointer'
                                                   }}
                                                   onClick={() => {
+                                                    markNotificationAsRead(notif.id);
                                                     setShowNotifications(false);
                                                     navigate('/profile');
                                                   }}

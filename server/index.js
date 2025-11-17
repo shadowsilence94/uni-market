@@ -810,11 +810,46 @@ app.patch('/api/notifications/:id', authenticateToken, (req, res) => {
   }
   
   // Check if user has access to this notification
-  if (notification.userId !== req.user.id && notification.userId !== 'all') {
+  const canAccess = notification.userId === req.user.id || 
+                   notification.userId === 'all' || 
+                   notification.userId === "all" ||
+                   notification.userId === null;
+  
+  if (!canAccess) {
     return res.status(403).json({ message: 'Access denied' });
   }
   
   notification.read = read;
+  writeData(data);
+  res.json(notification);
+});
+
+// Mark notification as read
+app.put('/api/notifications/:id/read', authenticateToken, (req, res) => {
+  const data = readData();
+  const notificationId = parseInt(req.params.id);
+  
+  if (!data.notifications) {
+    return res.status(404).json({ message: 'Notification not found' });
+  }
+  
+  const notification = data.notifications.find(n => n.id === notificationId);
+  
+  if (!notification) {
+    return res.status(404).json({ message: 'Notification not found' });
+  }
+  
+  // Check if user has access to this notification
+  const canAccess = notification.userId === req.user.id || 
+                   notification.userId === 'all' || 
+                   notification.userId === "all" ||
+                   notification.userId === null;
+  
+  if (!canAccess) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+  
+  notification.read = true;
   writeData(data);
   res.json(notification);
 });

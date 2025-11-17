@@ -49,6 +49,13 @@ const ProductDetailPage: React.FC = () => {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    price: '',
+    description: '',
+    category: ''
+  });
 
   useEffect(() => {
     fetchItem();
@@ -114,6 +121,13 @@ const ProductDetailPage: React.FC = () => {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/items/${id}`);
       setItem(response.data);
+      // Initialize edit form
+      setEditForm({
+        title: response.data.title,
+        price: response.data.price.toString(),
+        description: response.data.description,
+        category: response.data.category
+      });
     } catch (err) {
       console.error('Failed to fetch item:', err);
       setError('Item not found');
@@ -209,6 +223,50 @@ const ProductDetailPage: React.FC = () => {
     }
     
     setTimeout(() => setActionSuccess(null), 3000);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!item || !currentUser) return;
+    
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(`${API_BASE}/items/${item.id}`, {
+        title: editForm.title,
+        price: parseFloat(editForm.price),
+        description: editForm.description,
+        category: editForm.category
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setItem(response.data);
+      setIsEditing(false);
+      setActionSuccess('✅ Item updated successfully!');
+      setTimeout(() => setActionSuccess(null), 3000);
+    } catch (err: any) {
+      console.error('Failed to update item:', err);
+      alert('Failed to update item. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Reset form to original values
+    if (item) {
+      setEditForm({
+        title: item.title,
+        price: item.price.toString(),
+        description: item.description,
+        category: item.category
+      });
+    }
   };
 
   if (loading) {
@@ -441,12 +499,12 @@ const ProductDetailPage: React.FC = () => {
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleContactClick}
+                    onClick={item?.seller?.id === currentUser.id ? handleEditClick : handleContactClick}
                     className="btn btn-primary action-button" 
                     style={{ flex: 1 }}
-                    disabled={item?.seller?.id === currentUser.id}
+                    disabled={actionLoading}
                   >
-                    {item?.seller?.id === currentUser.id ? 'Your Item' : 'Contact Seller'}
+                    {item?.seller?.id === currentUser.id ? '✏️ Edit Item' : 'Contact Seller'}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -505,6 +563,97 @@ const ProductDetailPage: React.FC = () => {
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Edit Item Modal */}
+      {isEditing && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '2rem',
+            width: '90%',
+            maxWidth: '500px',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ marginBottom: '1rem' }}>Edit Item</h3>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Title</label>
+              <input
+                type="text"
+                value={editForm.title}
+                onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Price (฿)</label>
+              <input
+                type="number"
+                value={editForm.price}
+                onChange={(e) => setEditForm({...editForm, price: e.target.value})}
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Category</label>
+              <select
+                value={editForm.category}
+                onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+              >
+                <option value="Electronics">Electronics</option>
+                <option value="Books">Books</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Food">Food</option>
+                <option value="Services">Services</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Description</label>
+              <textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                rows={4}
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px', resize: 'vertical' }}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleCancelEdit}
+                disabled={actionLoading}
+                style={{ padding: '0.5rem 1rem', border: '1px solid #ddd', borderRadius: '4px', background: 'white' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={actionLoading}
+                style={{ padding: '0.5rem 1rem', background: '#1a5f3f', color: 'white', border: 'none', borderRadius: '4px' }}
+              >
+                {actionLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Contact Seller Modal */}
       {showContactModal && (
