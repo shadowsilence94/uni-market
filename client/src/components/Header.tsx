@@ -569,7 +569,9 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
                   boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
                   zIndex: 9999,
                   border: '2px solid rgba(251, 191, 36, 0.3)',
-                  minWidth: '200px'
+                  minWidth: '200px',
+                  maxHeight: '70vh',
+                  overflowY: 'auto'
                 }}
               >
                 <div style={{ padding: '1rem' }} className="space-y-2">
@@ -675,14 +677,16 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
                     )}
                   </div>
 
-                  {/* About Us */}
-                  <Link 
-                    to="/about" 
-                    className="mobile-category-item"
-                    onClick={() => setShowMobileCategoryMenu(false)}
-                  >
-                    ℹ️ About Us
-                  </Link>
+                  {/* About Us - Hidden on mobile */}
+                  <div className="mobile-about-us-link">
+                    <Link 
+                      to="/about" 
+                      className="mobile-category-item"
+                      onClick={() => setShowMobileCategoryMenu(false)}
+                    >
+                      ℹ️ About Us
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -702,7 +706,9 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
                   borderRadius: '0.75rem',
                   boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
                   zIndex: 9998,
-                  border: '2px solid rgba(251, 191, 36, 0.3)'
+                  border: '2px solid rgba(251, 191, 36, 0.3)',
+                  maxHeight: '70vh',
+                  overflowY: 'auto'
                 }}
               >
                 <div style={{ padding: '1rem' }} className="space-y-3">
@@ -1135,6 +1141,51 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
           min-width: 320px;
           max-width: 400px;
         }
+        
+        /* Hamburger Menu Dropdown Scrollbar Styling */
+        .hamburger-menu-dropdown {
+          scrollbar-width: thin;
+          scrollbar-color: #fbbf24 rgba(255, 255, 255, 0.1);
+        }
+        .hamburger-menu-dropdown::-webkit-scrollbar {
+          width: 8px;
+        }
+        .hamburger-menu-dropdown::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .hamburger-menu-dropdown::-webkit-scrollbar-thumb {
+          background: #fbbf24;
+          border-radius: 4px;
+        }
+        .hamburger-menu-dropdown::-webkit-scrollbar-thumb:hover {
+          background: #f59e0b;
+        }
+        
+        /* Mobile Category Dropdown Scrollbar Styling */
+        .mobile-category-dropdown {
+          scrollbar-width: thin;
+          scrollbar-color: #fbbf24 rgba(255, 255, 255, 0.1);
+        }
+        .mobile-category-dropdown::-webkit-scrollbar {
+          width: 8px;
+        }
+        .mobile-category-dropdown::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .mobile-category-dropdown::-webkit-scrollbar-thumb {
+          background: #fbbf24;
+          border-radius: 4px;
+        }
+        .mobile-category-dropdown::-webkit-scrollbar-thumb:hover {
+          background: #f59e0b;
+        }
+        
+        /* Show About Us on desktop/tablet, hide on mobile */
+        .mobile-about-us-link {
+          display: block;
+        }
 
         @media (max-width: 640px) {
           .nav-btn {
@@ -1174,6 +1225,11 @@ const Header: React.FC<{ setHeaderHeight: (height: number) => void }> = ({ setHe
             bottom: 2rem;
             left: 2rem;
             z-index: 100;
+          }
+          
+          /* Hide About Us on mobile */
+          .mobile-about-us-link {
+            display: none !important;
           }
           
           .hamburger-button {

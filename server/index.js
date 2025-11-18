@@ -968,36 +968,56 @@ app.put('/api/verification-requests/:id/reject', authenticateToken, requireAdmin
 
 // Chat/Conversation Routes
 app.get('/api/conversations', authenticateToken, (req, res) => {
-  const data = readData();
-  
-  if (!data.conversations) data.conversations = [];
-  
-  // Get conversations where user is buyer or seller
-  const userConversations = data.conversations.filter(
-    conv => conv.buyer_id === req.user.id || conv.seller_id === req.user.id
-  );
-  
-  // Format conversations with other user info and item details
-  const formattedConversations = userConversations.map(conv => {
-    const otherId = conv.buyer_id === req.user.id ? conv.seller_id : conv.buyer_id;
-    const otherUser = data.users.find(u => u.id === otherId);
-    const item = data.items.find(i => i.id === conv.item_id);
+  try {
+    const data = readData();
     
-    return {
-      ...conv,
-      other_user_name: otherUser?.name || 'Unknown',
-      item_title: item?.title || 'Item not found',
-      unread_count: conv.unread_count || 0
-    };
-  });
-  
-  res.json(formattedConversations);
+    // Initialize conversations array if it doesn't exist
+    if (!data.conversations) {
+      data.conversations = [];
+    }
+    
+    // Get conversations where user is buyer or seller
+    const userConversations = data.conversations.filter(
+      conv => conv.buyer_id === req.user.id || conv.seller_id === req.user.id
+    );
+    
+    // Format conversations with other user info and item details
+    const formattedConversations = userConversations.map(conv => {
+      const otherId = conv.buyer_id === req.user.id ? conv.seller_id : conv.buyer_id;
+      const otherUser = data.users?.find(u => u.id === otherId);
+      const item = data.items?.find(i => i.id === conv.item_id);
+      
+      // Get last message for this conversation
+      const conversationMessages = data.messages?.filter(m => m.conversation_id === conv.id) || [];
+      const lastMsg = conversationMessages.length > 0 
+        ? conversationMessages[conversationMessages.length - 1].message 
+        : conv.last_message || '';
+      
+      return {
+        ...conv,
+        other_user_name: otherUser?.name || 'Unknown User',
+        item_title: item?.title || 'Item not found',
+        last_message: lastMsg,
+        unread_count: conv.unread_count || 0
+      };
+    });
+    
+    // Sort by most recent update
+    formattedConversations.sort((a, b) => 
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
+    
+    res.json(formattedConversations);
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ message: 'Failed to fetch conversations' });
+  }
 });
 
 app.post('/api/conversations', authenticateToken, (req, res) => {
   try {
     const { item_id, seller_id } = req.body;
-    console.log('Creating conversation request:', { item_id, seller_id, user_id: req.user.id });
+    console.log('Creating conversation request:', { item_id, seller_id, buyer_id: req.user.id });
     const data = readData();
     
     // Validate input
@@ -1006,41 +1026,74 @@ app.post('/api/conversations', authenticateToken, (req, res) => {
       return res.status(400).json({ message: 'Missing item_id or seller_id' });
     }
     
+    // Convert to numbers
+    const itemId = parseInt(item_id);
+    const sellerId = parseInt(seller_id);
+    const buyerId = req.user.id;
+    
+    if (isNaN(itemId) || isNaN(sellerId)) {
+      return res.status(400).json({ message: 'Invalid item_id or seller_id format' });
+    }
+    
+    // Prevent self-conversation
+    if (buyerId === sellerId) {
+      console.log('User trying to message themselves');
+      return res.status(400).json({ message: 'You cannot start a conversation with yourself' });
+    }
+    
     // Check if item exists
-    const item = data.items.find(i => i.id === item_id);
+    const item = data.items?.find(i => i.id === itemId);
     if (!item) {
-      console.log('Item not found:', item_id);
+      console.log('Item not found:', itemId);
       return res.status(404).json({ message: 'Item not found' });
     }
     
     // Check if seller exists
-    const seller = data.users.find(u => u.id === seller_id);
+    const seller = data.users?.find(u => u.id === sellerId);
     if (!seller) {
-      console.log('Seller not found:', seller_id);
+      console.log('Seller not found:', sellerId);
       return res.status(404).json({ message: 'Seller not found' });
     }
     
+    // Check if buyer exists (current user)
+    const buyer = data.users?.find(u => u.id === buyerId);
+    if (!buyer) {
+      console.log('Buyer not found:', buyerId);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Initialize arrays if they don't exist
     if (!data.conversations) data.conversations = [];
     if (!data.messages) data.messages = [];
     
     // Check if conversation already exists
     const existing = data.conversations.find(
-      conv => conv.item_id === item_id && 
-      conv.buyer_id === req.user.id && 
-      conv.seller_id === seller_id
+      conv => conv.item_id === itemId && 
+      conv.buyer_id === buyerId && 
+      conv.seller_id === sellerId
     );
     
     if (existing) {
       console.log('Conversation already exists:', existing.id);
-      return res.json(existing);
+      // Return with formatted data
+      return res.json({
+        ...existing,
+        other_user_name: seller.name,
+        item_title: item.title
+      });
     }
+    
+    // Generate unique ID
+    const newConversationId = data.conversations.length > 0
+      ? Math.max(...data.conversations.map(c => c.id)) + 1
+      : 1;
     
     // Create new conversation
     const newConversation = {
-      id: data.conversations.length + 1,
-      item_id,
-      buyer_id: req.user.id,
-      seller_id,
+      id: newConversationId,
+      item_id: itemId,
+      buyer_id: buyerId,
+      seller_id: sellerId,
       last_message: '',
       unread_count: 0,
       created_at: new Date().toISOString(),
@@ -1051,7 +1104,13 @@ app.post('/api/conversations', authenticateToken, (req, res) => {
     writeData(data);
     
     console.log('New conversation created:', newConversation.id);
-    res.json(newConversation);
+    
+    // Return with formatted data
+    res.json({
+      ...newConversation,
+      other_user_name: seller.name,
+      item_title: item.title
+    });
   } catch (error) {
     console.error('Error creating conversation:', error);
     res.status(500).json({ message: 'Server error creating conversation' });
@@ -1059,79 +1118,127 @@ app.post('/api/conversations', authenticateToken, (req, res) => {
 });
 
 app.get('/api/conversations/:id/messages', authenticateToken, (req, res) => {
-  const data = readData();
-  const conversationId = parseInt(req.params.id);
-  
-  if (!data.messages) data.messages = [];
-  
-  // Get messages for this conversation
-  const messages = data.messages.filter(msg => msg.conversation_id === conversationId);
-  
-  // Add sender names
-  const messagesWithNames = messages.map(msg => {
-    const sender = data.users.find(u => u.id === msg.sender_id);
-    return {
-      ...msg,
-      sender_name: sender?.name || 'Unknown'
-    };
-  });
-  
-  // Mark messages as read for current user
-  const conversation = data.conversations?.find(c => c.id === conversationId);
-  if (conversation && conversation.buyer_id === req.user.id) {
-    conversation.unread_count = 0;
-    writeData(data);
+  try {
+    const data = readData();
+    const conversationId = parseInt(req.params.id);
+    
+    // Validate conversation ID
+    if (isNaN(conversationId)) {
+      return res.status(400).json({ message: 'Invalid conversation ID' });
+    }
+    
+    // Initialize arrays if they don't exist
+    if (!data.messages) data.messages = [];
+    if (!data.conversations) data.conversations = [];
+    
+    // Check if conversation exists and user has access
+    const conversation = data.conversations.find(c => c.id === conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+    
+    // Verify user is part of the conversation
+    if (conversation.buyer_id !== req.user.id && conversation.seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to view this conversation' });
+    }
+    
+    // Get messages for this conversation
+    const messages = data.messages.filter(msg => msg.conversation_id === conversationId);
+    
+    // Add sender names
+    const messagesWithNames = messages.map(msg => {
+      const sender = data.users?.find(u => u.id === msg.sender_id);
+      return {
+        ...msg,
+        sender_name: sender?.name || 'Unknown User'
+      };
+    });
+    
+    // Mark messages as read for current user
+    if (conversation.buyer_id === req.user.id) {
+      conversation.unread_count = 0;
+      writeData(data);
+    }
+    
+    res.json(messagesWithNames);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ message: 'Failed to fetch messages' });
   }
-  
-  res.json(messagesWithNames);
 });
 
 app.post('/api/conversations/:id/messages', authenticateToken, (req, res) => {
-  const { message } = req.body;
-  const conversationId = parseInt(req.params.id);
-  const data = readData();
-  
-  if (!data.messages) data.messages = [];
-  if (!data.conversations) data.conversations = [];
-  
-  const conversation = data.conversations.find(c => c.id === conversationId);
-  
-  if (!conversation) {
-    return res.status(404).json({ message: 'Conversation not found' });
+  try {
+    const { message } = req.body;
+    const conversationId = parseInt(req.params.id);
+    const data = readData();
+    
+    // Validate input
+    if (!message || !message.trim()) {
+      return res.status(400).json({ message: 'Message content is required' });
+    }
+    
+    if (isNaN(conversationId)) {
+      return res.status(400).json({ message: 'Invalid conversation ID' });
+    }
+    
+    // Initialize arrays if they don't exist
+    if (!data.messages) data.messages = [];
+    if (!data.conversations) data.conversations = [];
+    
+    const conversation = data.conversations.find(c => c.id === conversationId);
+    
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+    
+    // Check if user is part of this conversation
+    if (conversation.buyer_id !== req.user.id && conversation.seller_id !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to send messages in this conversation' });
+    }
+    
+    // Generate unique ID for message
+    const newMessageId = data.messages.length > 0 
+      ? Math.max(...data.messages.map(m => m.id)) + 1 
+      : 1;
+    
+    const newMessage = {
+      id: newMessageId,
+      conversation_id: conversationId,
+      sender_id: req.user.id,
+      message: message.trim(),
+      read: false,
+      created_at: new Date().toISOString()
+    };
+    
+    data.messages.push(newMessage);
+    
+    // Update conversation
+    conversation.last_message = message.trim();
+    conversation.updated_at = new Date().toISOString();
+    
+    // Increment unread count for the other user
+    if (conversation.buyer_id === req.user.id) {
+      // Message from buyer, seller should see it as unread
+      // Don't increment buyer's own unread count
+      conversation.unread_count = (conversation.unread_count || 0);
+    } else {
+      // Message from seller, increment buyer's unread
+      conversation.unread_count = (conversation.unread_count || 0) + 1;
+    }
+    
+    writeData(data);
+    
+    // Return message with sender name
+    const sender = data.users?.find(u => u.id === req.user.id);
+    res.json({
+      ...newMessage,
+      sender_name: sender?.name || 'Unknown User'
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ message: 'Failed to send message' });
   }
-  
-  // Check if user is part of this conversation
-  if (conversation.buyer_id !== req.user.id && conversation.seller_id !== req.user.id) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-  
-  const newMessage = {
-    id: data.messages.length + 1,
-    conversation_id: conversationId,
-    sender_id: req.user.id,
-    message,
-    read: false,
-    created_at: new Date().toISOString()
-  };
-  
-  data.messages.push(newMessage);
-  
-  // Update conversation
-  conversation.last_message = message;
-  conversation.updated_at = new Date().toISOString();
-  
-  // Increment unread count for the other user
-  if (conversation.buyer_id === req.user.id) {
-    // Message from buyer, increment seller's unread
-    conversation.unread_count = (conversation.unread_count || 0);
-  } else {
-    // Message from seller, increment buyer's unread
-    conversation.unread_count = (conversation.unread_count || 0) + 1;
-  }
-  
-  writeData(data);
-  
-  res.json(newMessage);
 });
 
 // Delete conversation (for existing chat widget)

@@ -145,6 +145,19 @@ const Footer: React.FC = () => {
               The premier marketplace for the AIT community. Connect, trade, and
               grow together.
             </p>
+            
+            {/* Address Section */}
+            <div className="mb-4 text-sm">
+              <div className="flex items-start space-x-2 text-gray-300">
+                <div className="leading-relaxed">
+                  <p className="font-medium text-white mb-1">Asian Institute of Technology</p>
+                  <p>58 Moo 9, Km. 42, Paholyothin Highway</p>
+                  <p>Klong Luang, Pathumthani 12120</p>
+                  <p>Thailand. +66 660780566</p>
+                </div>
+              </div>
+            </div>
+            
             {/* Social Icons */}
             <div className="flex space-x-4">
               <motion.a

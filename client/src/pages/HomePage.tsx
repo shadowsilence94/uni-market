@@ -125,15 +125,26 @@ const HomePage: React.FC = () => {
           <motion.p
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ 
-              delay: 0.5, 
+            transition={{
+              delay: 0.5,
               duration: 0.8,
               type: "spring",
               stiffness: 80
             }}
           >
-            The exclusive peer-to-peer marketplace for the Asian Institute of Technology community. 
-            Buy, sell, and connect with fellow students, faculty, and staff.
+            "Find a meaningful gift from AIT's cultural community"
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: 0.6,
+              duration: 0.8,
+              type: "spring",
+              stiffness: 80
+            }}
+          >
+            The exclusive peer-to-peer marketplace for the AIT community, discover and exchange meaningful, culturally inspired gifts, services, and campus essentials with fellow students, faculty, and staff.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -168,6 +179,7 @@ const HomePage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}
         className="text-center"
+        style={{ padding: '3rem 1rem' }}
       >
         <motion.h2 
           initial={{ opacity: 0, scale: 0.8 }}
@@ -178,93 +190,159 @@ const HomePage: React.FC = () => {
             type: "spring",
             stiffness: 120
           }}
-          style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}
+          style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '2.5rem' }}
         >
           Browse by Category
         </motion.h2>
         <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '1rem', 
-          maxWidth: '800px', 
-          margin: '0 auto',
-          flexWrap: 'wrap'
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '2rem', 
+          maxWidth: '1200px', 
+          margin: '0 auto'
         }}>
-          <Link to="/browse?category=Products" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+          <Link to="/browse?category=Products" style={{ textDecoration: 'none' }}>
             <motion.div
-              whileHover={{ scale: 1.05, y: -3 }}
+              whileHover={{ scale: 1.03, y: -5 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              className="bg-white rounded-2xl shadow-lg cursor-pointer"
               style={{ 
-                border: '2px solid #e5e7eb', 
+                border: '2px solid #e5e7eb',
                 transition: 'all 0.3s',
-                padding: '1.5rem',
-                aspectRatio: '1/1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
+                overflow: 'hidden',
+                height: '100%'
               }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📦</div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
-                Products
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
-                Physical goods
-              </p>
+              <div style={{
+                height: '200px',
+                background: 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '5rem',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ position: 'relative', zIndex: 1 }}>🎁</div>
+                <div style={{
+                  position: 'absolute',
+                  top: '-50px',
+                  right: '-50px',
+                  width: '150px',
+                  height: '150px',
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '50%'
+                }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'left' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.5rem' }}>
+                  Products
+                </h3>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1rem' }}>
+                  Explore our seller's products (such as gifts, handmades, cards)
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', color: '#1a5f3f', fontWeight: '600', fontSize: '0.95rem' }}>
+                  <span>Browse Products</span>
+                  <span style={{ marginLeft: '0.5rem' }}>→</span>
+                </div>
+              </div>
             </motion.div>
           </Link>
 
-          <Link to="/browse?category=Services" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+          <Link to="/browse?category=Services" style={{ textDecoration: 'none' }}>
             <motion.div
-              whileHover={{ scale: 1.05, y: -3 }}
+              whileHover={{ scale: 1.03, y: -5 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              className="bg-white rounded-2xl shadow-lg cursor-pointer"
               style={{ 
-                border: '2px solid #e5e7eb', 
+                border: '2px solid #e5e7eb',
                 transition: 'all 0.3s',
-                padding: '1.5rem',
-                aspectRatio: '1/1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
+                overflow: 'hidden',
+                height: '100%'
               }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛠️</div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
-                Services
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
-                Skills & assistance
-              </p>
+              <div style={{
+                height: '200px',
+                background: 'linear-gradient(135deg, #d1fae5 0%, #2d8659 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '5rem',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ position: 'relative', zIndex: 1 }}>🎓</div>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-50px',
+                  left: '-50px',
+                  width: '150px',
+                  height: '150px',
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '50%'
+                }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'left' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.5rem' }}>
+                  Services
+                </h3>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1rem' }}>
+                  Explore our student services (such as gift packaging, guitar lesson, tutoring etc)
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', color: '#1a5f3f', fontWeight: '600', fontSize: '0.95rem' }}>
+                  <span>Browse Services</span>
+                  <span style={{ marginLeft: '0.5rem' }}>→</span>
+                </div>
+              </div>
             </motion.div>
           </Link>
 
-          <Link to="/browse?category=Food" style={{ textDecoration: 'none', flex: '1 1 200px', maxWidth: '220px' }}>
+          <Link to="/browse?category=Food" style={{ textDecoration: 'none' }}>
             <motion.div
-              whileHover={{ scale: 1.05, y: -3 }}
+              whileHover={{ scale: 1.03, y: -5 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-white rounded-lg shadow-lg cursor-pointer"
+              className="bg-white rounded-2xl shadow-lg cursor-pointer"
               style={{ 
-                border: '2px solid #e5e7eb', 
+                border: '2px solid #e5e7eb',
                 transition: 'all 0.3s',
-                padding: '1.5rem',
-                aspectRatio: '1/1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
+                overflow: 'hidden',
+                height: '100%'
               }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🍜</div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.25rem' }}>
-                Food
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.75rem', textAlign: 'center' }}>
-                Meals & ingredients
-              </p>
+              <div style={{
+                height: '200px',
+                background: 'linear-gradient(135deg, #fee2e2 0%, #ef4444 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '5rem',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ position: 'relative', zIndex: 1 }}>🍜</div>
+                <div style={{
+                  position: 'absolute',
+                  top: '-50px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '150px',
+                  height: '150px',
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '50%'
+                }} />
+              </div>
+              <div style={{ padding: '1.5rem', textAlign: 'left' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a5f3f', marginBottom: '0.5rem' }}>
+                  Food
+                </h3>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1rem' }}>
+                  Explore the cultural foods from our diverse nationalities
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', color: '#1a5f3f', fontWeight: '600', fontSize: '0.95rem' }}>
+                  <span>Browse Food</span>
+                  <span style={{ marginLeft: '0.5rem' }}>→</span>
+                </div>
+              </div>
             </motion.div>
           </Link>
         </div>
@@ -432,14 +510,15 @@ const HomePage: React.FC = () => {
               List Your First Item
             </Link>
           </motion.div>
-          <motion.button 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }}
-            className="btn" 
-            style={{ border: '2px solid white', background: 'transparent', color: 'white' }}
-          >
-            Learn More
-          </motion.button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link 
+              to="/about"
+              className="btn" 
+              style={{ border: '2px solid white', background: 'transparent', color: 'white' }}
+            >
+              Learn More
+            </Link>
+          </motion.div>
         </motion.div>
       </motion.div>
     </motion.div>

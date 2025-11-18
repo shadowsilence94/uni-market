@@ -61,24 +61,54 @@ const ChatWidget: React.FC = () => {
   const fetchConversations = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      
       const response = await axios.get(`${API_BASE}/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setConversations(response.data);
-    } catch (err) {
+      
+      // Ensure response is an array
+      const conversationsData = Array.isArray(response.data) ? response.data : [];
+      setConversations(conversationsData);
+    } catch (err: any) {
       console.error('Failed to fetch conversations:', err);
+      // Set empty array on error instead of leaving undefined
+      setConversations([]);
+      
+      // Don't show error for newly registered users (404 or empty response is expected)
+      if (err.response?.status !== 404) {
+        console.error('Unexpected error:', err.response?.data);
+      }
     }
   };
 
   const fetchMessages = async (conversationId: number) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      
       const response = await axios.get(`${API_BASE}/conversations/${conversationId}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessages(response.data);
-    } catch (err) {
+      
+      // Ensure response is an array
+      const messagesData = Array.isArray(response.data) ? response.data : [];
+      setMessages(messagesData);
+    } catch (err: any) {
       console.error('Failed to fetch messages:', err);
+      // Set empty array on error
+      setMessages([]);
+      
+      // Don't show error for new conversations (empty messages is expected)
+      if (err.response?.status !== 404 && err.response?.status !== 200) {
+        console.error('Unexpected error:', err.response?.data);
+      }
     }
   };
 
@@ -89,24 +119,32 @@ const ChatWidget: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       await axios.post(
         `${API_BASE}/conversations/${selectedConversation.id}/messages`,
         { message: newMessage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
       setNewMessage('');
-      fetchMessages(selectedConversation.id);
-      fetchConversations();
-    } catch (err) {
+      await fetchMessages(selectedConversation.id);
+      await fetchConversations();
+    } catch (err: any) {
       console.error('Failed to send message:', err);
+      alert('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleConversationClick = (conversation: Conversation) => {
+  const handleConversationClick = async (conversation: Conversation) => {
     setSelectedConversation(conversation);
-    fetchMessages(conversation.id);
+    await fetchMessages(conversation.id);
+    // Refresh conversations to update unread counts
+    await fetchConversations();
   };
 
   const handleBack = () => {
@@ -119,19 +157,24 @@ const ChatWidget: React.FC = () => {
     
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       await axios.delete(`${API_BASE}/conversations/${conversationId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       setSelectedConversation(null);
       setMessages([]);
       await fetchConversations(); // Refresh the conversations list
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete conversation:', err);
-      alert('Failed to delete conversation');
+      alert(err.response?.data?.message || 'Failed to delete conversation');
     }
   };
 
-  const totalUnread = conversations.reduce((sum, conv) => sum + conv.unread_count, 0);
+  const totalUnread = conversations.reduce((sum, conv) => sum + (conv.unread_count || 0), 0);
 
   if (!currentUser) return null;
 

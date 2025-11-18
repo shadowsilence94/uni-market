@@ -12,6 +12,8 @@ const BrowsePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedNationality, setSelectedNationality] = useState('All');
+  const [selectedTag, setSelectedTag] = useState('All');
+  const [availableTags, setAvailableTags] = useState<string[]>(['All']);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,7 +54,7 @@ const BrowsePage: React.FC = () => {
     if (!tagParam) {
       fetchItems(searchQuery, undefined);
     }
-  }, [selectedCategory, selectedNationality]);
+  }, [selectedCategory, selectedNationality, selectedTag]);
 
   const fetchItems = async (searchQuery?: string, tagQuery?: string) => {
     try {
@@ -61,11 +63,23 @@ const BrowsePage: React.FC = () => {
       
       if (selectedCategory !== 'All') params.append('category', selectedCategory);
       if (selectedNationality !== 'All') params.append('nationality', selectedNationality);
+      if (selectedTag !== 'All') params.append('tag', selectedTag);
       if (searchQuery) params.append('search', searchQuery);
       if (tagQuery) params.append('tag', tagQuery);
 
       const response = await axios.get(`${API_BASE}/items?${params.toString()}`);
-      setItems(Array.isArray(response.data) ? response.data : []);
+      const fetchedItems = Array.isArray(response.data) ? response.data : [];
+      setItems(fetchedItems);
+      
+      // Extract unique tags from all items
+      const tags = new Set<string>(['All']);
+      fetchedItems.forEach((item: Item) => {
+        if (item.tags && Array.isArray(item.tags)) {
+          item.tags.forEach(tag => tags.add(tag));
+        }
+      });
+      setAvailableTags(Array.from(tags).sort());
+      
       setCurrentPage(1);
     } catch (err) {
       console.error('Failed to fetch items:', err);
@@ -76,9 +90,15 @@ const BrowsePage: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(items.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = items.slice(startIndex, startIndex + itemsPerPage);
+  
+  // Filter items by selected tag on client side
+  const filteredItems = selectedTag === 'All' 
+    ? items 
+    : items.filter(item => item.tags && item.tags.includes(selectedTag));
+  
+  const currentItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+  const actualTotalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -128,7 +148,7 @@ const BrowsePage: React.FC = () => {
         transition={{ delay: 0.4 }}
         className="bg-white p-6 rounded-lg shadow-lg"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
             <form onSubmit={handleSearch} className="flex">
               <input
@@ -175,17 +195,53 @@ const BrowsePage: React.FC = () => {
               ))}
             </select>
           </div>
-          <div style={{ display: 'flex', alignItems: 'end' }}>
-            <div style={{ 
-              padding: '0.75rem 1rem', 
-              background: '#f9fafb', 
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>
-              {items.length} items found
-            </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+              Tag Filter
+            </label>
+            <select
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              className="form-input"
+            >
+              {availableTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+          <div style={{ 
+            padding: '0.75rem 1rem', 
+            background: '#f9fafb', 
+            borderRadius: '0.5rem',
+            fontSize: '0.875rem',
+            color: '#6b7280'
+          }}>
+            {filteredItems.length} items found
+          </div>
+          {(selectedCategory !== 'All' || selectedNationality !== 'All' || selectedTag !== 'All') && (
+            <button
+              onClick={() => {
+                setSelectedCategory('All');
+                setSelectedNationality('All');
+                setSelectedTag('All');
+                setSearchQuery('');
+                setSearchParams({});
+              }}
+              className="btn"
+              style={{ 
+                background: '#ef4444', 
+                color: 'white',
+                padding: '0.5rem 1rem',
+                fontSize: '0.875rem'
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       </motion.div>
 
@@ -198,7 +254,7 @@ const BrowsePage: React.FC = () => {
         <div className="text-center py-8">
           <div className="error">{error}</div>
         </div>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -231,7 +287,7 @@ const BrowsePage: React.FC = () => {
           </motion.div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {actualTotalPages > 1 && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -251,7 +307,7 @@ const BrowsePage: React.FC = () => {
                 Previous
               </button>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              {Array.from({ length: actualTotalPages }, (_, i) => i + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
@@ -270,11 +326,11 @@ const BrowsePage: React.FC = () => {
               
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === actualTotalPages}
                 className="btn"
                 style={{ 
-                  background: currentPage === totalPages ? '#e5e7eb' : '#1a5f3f',
-                  color: currentPage === totalPages ? '#9ca3af' : 'white',
+                  background: currentPage === actualTotalPages ? '#e5e7eb' : '#1a5f3f',
+                  color: currentPage === actualTotalPages ? '#9ca3af' : 'white',
                   padding: '0.5rem 1rem'
                 }}
               >
